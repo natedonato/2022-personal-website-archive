@@ -97,11 +97,29 @@ p, h1, h2, h3, h4, h5, h6 {
   justify-content: center;
 }
 
+.project-grid-wrapper{
+  display: grid;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+  /* grid-template-columns: repeat(3, 1fr); */
+  grid-template-columns: repeat(5, 171px);
+  gap: 20px;
+  justify-content: center;
+}
+
+
 .card{
   font-size: 15px;
   margin-bottom: 20px;
   text-align: left;
 }
+
+.project-grid-wrapper .card{
+  font-size: 12px;
+}
+
+
 
 .card-img{
   border-radius: 4px;
@@ -113,6 +131,8 @@ p, h1, h2, h3, h4, h5, h6 {
 
 .minor-projects-list li{
   list-style: none;
+  font-size: 14px;
+
 }
 
 .card h3{
