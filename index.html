@@ -12,7 +12,10 @@
       <br />
       <br />
       <div class="hero-wrapper">
-        <div class="circle-img"></div>
+        <div id="face" class="circle-img">
+          <img id="face1" src="img/face0.png" alt="Nate" />
+          <img id="face2" style="display:none" src="img/face1.png" alt="Nate" />
+        </div>
         <div class="hero-text">
           <h1>Hey I'm Nate,</h1>
           <h2>
@@ -270,5 +273,46 @@
     <br /><br /><br />
     <h2>Work outside of tech:</h2>
     <h2>Education:</h2>
+
+
+
+    <script>
+      function scrollStop(callback, refresh = 66) {
+
+          // Make sure a valid callback was provided
+          if (!callback || typeof callback !== 'function') return;
+
+          // Setup scrolling variable
+          let isScrolling;
+
+          // Listen for scroll events
+          window.addEventListener('scroll', function (event) {
+
+            // Clear our timeout throughout the scroll
+            window.clearTimeout(isScrolling);
+
+            // Set a timeout to run after scrolling ends
+            isScrolling = setTimeout(callback, refresh);
+
+          }, false);
+
+        }
+     let face = document.getElementById("face");
+     let face1 = document.getElementById("face1");
+     let face2 = document.getElementById("face2");
+
+      window.addEventListener("scroll", (e) => {
+        let offsetTop = window.scrollY;
+
+        let style = `rotate(${offsetTop}deg)`
+
+        face.style.transform = style
+
+        face2.style.display = "block";
+        face1.style.display = "none";
+      })
+
+      scrollStop(() =>{face1.style.display = "block"; face2.style.display = "none"}, 40)
+    </script>
   </body>
 </html>
