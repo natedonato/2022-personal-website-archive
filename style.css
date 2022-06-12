@@ -1,24 +1,23 @@
-
 @font-face {
-    font-family: 'LatinModernMono';
-    src: url('fonts/lmmono10-regular.otf') format('opentype'); 
-    font-weight: normal;
-    text-rendering: optimizeLegibility;
+  font-family: 'LatinModernMono';
+  src: url('fonts/lmmono10-regular.otf') format('opentype');
+  font-weight: normal;
+  text-rendering: optimizeLegibility;
 }
 
 @font-face {
-    font-family: 'LatinModernMono';
-    src: url('fonts/lmmono10-italic.otf') format('opentype'); 
-             font-style: italic;
-    font-weight: normal;
-    text-rendering: optimizeLegibility;
+  font-family: 'LatinModernMono';
+  src: url('fonts/lmmono10-italic.otf') format('opentype');
+  font-style: italic;
+  font-weight: normal;
+  text-rendering: optimizeLegibility;
 }
 
 @font-face {
-    font-family: 'LatinModernMonoBold';
-    src: url('fonts/lmmonolt10-bold.otf') format('opentype'); 
-    font-weight: normal;
-    text-rendering: optimizeLegibility;
+  font-family: 'LatinModernMonoBold';
+  src: url('fonts/lmmonolt10-bold.otf') format('opentype');
+  font-weight: normal;
+  text-rendering: optimizeLegibility;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
@@ -37,21 +36,27 @@
 /*
   1. Use a more-intuitive box-sizing model.
 */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
+
 /*
   2. Remove default margin
 */
 * {
   margin: 0;
 }
+
 /*
   3. Allow percentage-based heights in the application
 */
-html, body {
+html,
+body {
   height: 100%;
 }
+
 /*
   Typographic tweaks!
   4. Add accessible line-height
@@ -64,33 +69,51 @@ body {
   width: 100%;
   overflow-x: hidden;
 }
+
 /*
   6. Improve media defaults
 */
-img, picture, video, canvas, svg {
+img,
+picture,
+video,
+canvas,
+svg {
   display: block;
   max-width: 100%;
 }
+
 /*
   7. Remove built-in form typography styles
 */
-input, button, textarea, select {
+input,
+button,
+textarea,
+select {
   font: inherit;
 }
+
 /*
   8. Avoid text overflows
 */
-p, h1, h2, h3, h4, h5, h6 {
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   overflow-wrap: break-word;
 }
+
 /*
   9. Create a root stacking context
 */
-#root, #__next {
+#root,
+#__next {
   isolation: isolate;
 }
 
-.topbar{
+.topbar {
   font-family: 'Pacifico', cursive;
   height: 60px;
   font-size: 30px;
@@ -99,57 +122,104 @@ p, h1, h2, h3, h4, h5, h6 {
   /* background: linear-gradient(45deg, #05c726, hsl(157deg 89% 45%)); */
 }
 
-.ticker{
+.ticker {
   position: absolute;
   background-color: black;
   color: white;
   font-weight: 800;
   padding: 20px 5px;
   white-space: nowrap;
-  animation: marquee 25s linear infinite;
+  animation: marquee 45s linear infinite;
+}
+
+.ticker:hover {
+  animation-play-state: paused;
+}
+
+.ticker span:hover {
+  color: #ff14f3;
+  cursor: default;
 }
 
 @keyframes marquee {
-  0% { left: 0; }
-  100% { left: calc(-200%); }
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
-.grid-wrapper{
+.grid-wrapper {
   display: grid;
-  max-width: 1000px;
+  padding-left: 20px;
+  padding-right: 20px;
+  max-width: 940px;
   width: 100%;
   margin: 0 auto;
-  /* grid-template-columns: repeat(3, 1fr); */
-  grid-template-columns: repeat(3, 300px);
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   justify-content: center;
 }
 
-.project-grid-wrapper{
+.project-grid-wrapper {
   display: grid;
-  max-width: 1000px;
+
+
+
+
+  max-width: 959px;
   width: 100%;
   margin: 0 auto;
-  /* grid-template-columns: repeat(3, 1fr); */
-  grid-template-columns: repeat(5, 171px);
+  grid-template-columns: repeat(5, 1fr);
+  padding: 0px 12px;
   gap: 20px;
   justify-content: center;
 }
 
+@media only screen and (max-width: 700px) {
+  .grid-wrapper {
+    grid-template-columns: minmax(0, 300px);
+  }
 
-.card{
+  .project-grid-wrapper {
+    grid-template-columns: repeat(12, 1fr);
+    padding-left: 12px;
+    padding-right: 12px;
+    /* grid-auto-rows: 40px;
+  grid-gap: 10px; */
+  }
+
+  .project-grid-wrapper .card:nth-child(-1n + 3) {
+    grid-column: span 4;
+  }
+
+  .project-grid-wrapper .card:nth-last-child(2) {
+    grid-row-start: 2;
+    grid-column: 3 / span 4;
+  }
+
+  .project-grid-wrapper .card:nth-last-child(1) {
+    grid-row-start: 2;
+    grid-column: 7 / span 4;
+  }
+}
+
+
+
+.card {
   font-size: 15px;
   margin-bottom: 20px;
   text-align: left;
 }
 
-.project-grid-wrapper .card{
+.project-grid-wrapper .card {
   font-size: 12px;
 }
 
 
 
-.card-img{
+.card-img {
   border-radius: 4px;
   /* height: 200px; */
   width: 100%;
@@ -157,36 +227,40 @@ p, h1, h2, h3, h4, h5, h6 {
   /* object-fit: cover; */
 }
 
-.card:hover .card-img{
+.card:hover .card-img {
   animation: 0.5s infinite shakething;
-  transform: scale(1.4);
+  transform: scale(1.25);
 }
 
-.minor-projects-list li{
+.minor-projects-list li {
   list-style: none;
   font-size: 14px;
 
 }
 
-.card h3{
+.card h3 {
   font-size: 20px;
   margin-block-start: 1rem;
   margin-block-end: 0.5rem;
 }
 
 
-.project-link-container{
+.project-link-container {
   padding-left: 1rem;
   padding-inline-start: 1rem;
   margin-top: 1rem;
 }
 
-a{
+
+a {
+  cursor: pointer;
   font-style: italic;
   color: #2154FF;
   display: inline-block;
+  text-decoration: none;
 }
-a:hover{
+
+a:hover {
   color: #2154FF;
   color: #ff14f3;
   opacity: 0.95;
@@ -196,7 +270,7 @@ a:hover{
   box-shadow: 0px 1px 0px #5773ff; */
 }
 
-.hero-wrapper{
+.hero-wrapper {
   display: flex;
   max-width: 1000px;
   margin: 0 auto;
@@ -205,17 +279,17 @@ a:hover{
   margin-bottom: -100px;
 }
 
-.hero-text{
+.hero-text {
   max-width: 480px;
 }
 
-.face-container{
+.face-container {
   height: 500px;
   width: auto;
   position: relative;
 }
 
-.circle-img{ 
+.circle-img {
   top: 300px;
   position: sticky;
   border-radius: 100%;
@@ -226,34 +300,37 @@ a:hover{
   flex-shrink: 0;
 }
 
-.clip1{
+.clip1 {
   clip-path: polygon(7% 0%, 7% 10%, 1% 14%, 5% 23%, 1% 28%, 4% 38%, 1% 42%, 5% 56%, 0% 60%, 7% 66%, 1% 72%, 8% 81%, 3% 93%, 16% 86%, 21% 99%, 28% 89%, 36% 97%, 44% 77%, 50% 99%, 61% 85%, 68% 99%, 74% 81%, 82% 94%, 84% 76%, 96% 80%, 88% 59%, 98% 48%, 88% 45%, 96% 35%, 93% 34%, 96% 27%, 88% 24%, 89% 16%, 78% 18%, 78% 5%, 66% 18%, 62% 4%, 55% 14%, 48% 4%, 39% 14%, 33% 6%, 25% 14%, 21% 4%, 16% 18%);
 }
 
-.clip2{
-    clip-path: polygon(24% 19%, 9% 10%, 14% 32%, 4% 39%, 14% 57%, 8% 72%, 22% 71%, 26% 90%, 38% 72%, 47% 90%, 62% 79%, 66% 96%, 69% 77%, 78% 90%, 83% 71%, 91% 69%, 82% 57%, 89% 44%, 81% 39%, 84% 26%, 74% 28%, 71% 10%, 63% 20%, 57% 1%, 51% 15%, 45% 6%, 37% 15%, 29% 5%);
+.clip2 {
+  clip-path: polygon(24% 19%, 9% 10%, 14% 32%, 4% 39%, 14% 57%, 8% 72%, 22% 71%, 26% 90%, 38% 72%, 47% 90%, 62% 79%, 66% 96%, 69% 77%, 78% 90%, 83% 71%, 91% 69%, 82% 57%, 89% 44%, 81% 39%, 84% 26%, 74% 28%, 71% 10%, 63% 20%, 57% 1%, 51% 15%, 45% 6%, 37% 15%, 29% 5%);
 }
 
-.clip3{
-    clip-path: polygon(13% 2%, 13% 16%, 4% 12%, 8% 23%, 3% 29%, 9% 35%, 3% 48%, 12% 56%, 6% 68%, 18% 73%, 16% 89%, 26% 79%, 33% 90%, 41% 74%, 48% 88%, 57% 76%, 66% 94%, 72% 75%, 74% 83%, 76% 79%, 80% 82%, 81% 74%, 88% 78%, 85% 65%, 92% 63%, 88% 56%, 96% 42%, 85% 36%, 90% 12%, 81% 20%, 77% 5%, 68% 17%, 59% 3%, 54% 14%, 46% 4%, 39% 12%, 32% 3%, 25% 20%, 22% 7%, 19% 15%);
+.clip3 {
+  clip-path: polygon(13% 2%, 13% 16%, 4% 12%, 8% 23%, 3% 29%, 9% 35%, 3% 48%, 12% 56%, 6% 68%, 18% 73%, 16% 89%, 26% 79%, 33% 90%, 41% 74%, 48% 88%, 57% 76%, 66% 94%, 72% 75%, 74% 83%, 76% 79%, 80% 82%, 81% 74%, 88% 78%, 85% 65%, 92% 63%, 88% 56%, 96% 42%, 85% 36%, 90% 12%, 81% 20%, 77% 5%, 68% 17%, 59% 3%, 54% 14%, 46% 4%, 39% 12%, 32% 3%, 25% 20%, 22% 7%, 19% 15%);
 }
 
 @keyframes shakething {
-  0%{ clip-path: polygon(7% 0%, 7% 10%, 1% 14%, 5% 23%, 1% 28%, 4% 38%, 1% 42%, 5% 56%, 0% 60%, 7% 66%, 1% 72%, 8% 81%, 3% 93%, 16% 86%, 21% 99%, 28% 89%, 36% 97%, 44% 77%, 50% 99%, 61% 85%, 68% 99%, 74% 81%, 82% 94%, 84% 76%, 96% 80%, 88% 59%, 98% 48%, 88% 45%, 96% 35%, 93% 34%, 96% 27%, 88% 24%, 89% 16%, 78% 18%, 78% 5%, 66% 18%, 62% 4%, 55% 14%, 48% 4%, 39% 14%, 33% 6%, 25% 14%, 21% 4%, 16% 18%);
- }
-  33%{clip-path: polygon(24% 19%, 9% 10%, 14% 32%, 4% 39%, 14% 57%, 8% 72%, 22% 71%, 26% 90%, 38% 72%, 47% 90%, 62% 79%, 66% 96%, 69% 77%, 78% 90%, 83% 71%, 91% 69%, 82% 57%, 89% 44%, 81% 39%, 84% 26%, 74% 28%, 71% 10%, 63% 20%, 57% 1%, 51% 15%, 45% 6%, 37% 15%, 29% 5%);
- }
-  66%{
+  0% {
+    clip-path: polygon(7% 0%, 7% 10%, 1% 14%, 5% 23%, 1% 28%, 4% 38%, 1% 42%, 5% 56%, 0% 60%, 7% 66%, 1% 72%, 8% 81%, 3% 93%, 16% 86%, 21% 99%, 28% 89%, 36% 97%, 44% 77%, 50% 99%, 61% 85%, 68% 99%, 74% 81%, 82% 94%, 84% 76%, 96% 80%, 88% 59%, 98% 48%, 88% 45%, 96% 35%, 93% 34%, 96% 27%, 88% 24%, 89% 16%, 78% 18%, 78% 5%, 66% 18%, 62% 4%, 55% 14%, 48% 4%, 39% 14%, 33% 6%, 25% 14%, 21% 4%, 16% 18%);
+  }
+
+  33% {
+    clip-path: polygon(24% 19%, 9% 10%, 14% 32%, 4% 39%, 14% 57%, 8% 72%, 22% 71%, 26% 90%, 38% 72%, 47% 90%, 62% 79%, 66% 96%, 69% 77%, 78% 90%, 83% 71%, 91% 69%, 82% 57%, 89% 44%, 81% 39%, 84% 26%, 74% 28%, 71% 10%, 63% 20%, 57% 1%, 51% 15%, 45% 6%, 37% 15%, 29% 5%);
+  }
+
+  66% {
     clip-path: polygon(13% 2%, 13% 16%, 4% 12%, 8% 23%, 3% 29%, 9% 35%, 3% 48%, 12% 56%, 6% 68%, 18% 73%, 16% 89%, 26% 79%, 33% 90%, 41% 74%, 48% 88%, 57% 76%, 66% 94%, 72% 75%, 74% 83%, 76% 79%, 80% 82%, 81% 74%, 88% 78%, 85% 65%, 92% 63%, 88% 56%, 96% 42%, 85% 36%, 90% 12%, 81% 20%, 77% 5%, 68% 17%, 59% 3%, 54% 14%, 46% 4%, 39% 12%, 32% 3%, 25% 20%, 22% 7%, 19% 15%);
   }
-  100%{
-     clip-path: polygon(7% 0%, 7% 10%, 1% 14%, 5% 23%, 1% 28%, 4% 38%, 1% 42%, 5% 56%, 0% 60%, 7% 66%, 1% 72%, 8% 81%, 3% 93%, 16% 86%, 21% 99%, 28% 89%, 36% 97%, 44% 77%, 50% 99%, 61% 85%, 68% 99%, 74% 81%, 82% 94%, 84% 76%, 96% 80%, 88% 59%, 98% 48%, 88% 45%, 96% 35%, 93% 34%, 96% 27%, 88% 24%, 89% 16%, 78% 18%, 78% 5%, 66% 18%, 62% 4%, 55% 14%, 48% 4%, 39% 14%, 33% 6%, 25% 14%, 21% 4%, 16% 18%);
+
+  100% {
+    clip-path: polygon(7% 0%, 7% 10%, 1% 14%, 5% 23%, 1% 28%, 4% 38%, 1% 42%, 5% 56%, 0% 60%, 7% 66%, 1% 72%, 8% 81%, 3% 93%, 16% 86%, 21% 99%, 28% 89%, 36% 97%, 44% 77%, 50% 99%, 61% 85%, 68% 99%, 74% 81%, 82% 94%, 84% 76%, 96% 80%, 88% 59%, 98% 48%, 88% 45%, 96% 35%, 93% 34%, 96% 27%, 88% 24%, 89% 16%, 78% 18%, 78% 5%, 66% 18%, 62% 4%, 55% 14%, 48% 4%, 39% 14%, 33% 6%, 25% 14%, 21% 4%, 16% 18%);
   }
 }
 
-.icons{
-
-
+.icons {
   display: flex;
   justify-content: space-evenly;
   align-items: center;
@@ -264,7 +341,7 @@ a:hover{
   background-color: white;
   margin: 0 auto;
   z-index: 100;
-  position: fixed;
+  position: sticky;
   bottom: -200px;
   width: 140px;
   height: 40px;
@@ -275,13 +352,26 @@ a:hover{
 }
 
 @keyframes appearup {
-  0% { bottom: -40px; }
-  100% { bottom: 20px; }
+  0% {
+    bottom: -40px;
+  }
+
+  100% {
+    bottom: 20px;
+  }
 }
 
-.icons a{
+.icons a {
   color: rgb(58, 58, 58);
 }
-.icons a:hover{
-  color:#ff14f3;
+
+.icons a:hover {
+  color: #ff14f3;
+}
+
+.footer {
+  margin-top: 20px;
+  background: white;
+  height: 60px;
+  line-height: 60px;
 }
