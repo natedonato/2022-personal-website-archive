@@ -11,6 +11,7 @@
   font-style: italic;
   font-weight: normal;
   text-rendering: optimizeLegibility;
+  
 }
 /* 
 @font-face {
@@ -200,6 +201,14 @@ h6 {
   width: 100%;
   height: auto;
   /* object-fit: cover; */
+}
+
+.card{
+  transform: scaleZ(1);
+}
+
+.card:hover{
+  z-index: 10;
 }
 
 .card:hover .card-img {
