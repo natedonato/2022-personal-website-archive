@@ -375,13 +375,17 @@
     let face1 = document.getElementById("face1");
     let face2 = document.getElementById("face2");
 
-    window.addEventListener("scroll", (e) => {
+    function rotateMan(){
       let offsetTop = window.scrollY;
       let style = `rotate(${offsetTop}deg)`;
       face.style.transform = style;
 
       face2.style.display = "block";
       face1.style.display = "none";
+    }
+
+    window.addEventListener("scroll", (e) => {
+      requestAnimationFrame(rotateMan)
     });
 
     scrollStop(() => {
