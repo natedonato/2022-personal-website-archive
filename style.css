@@ -260,7 +260,6 @@ a {
 a:hover {
   color: #2154FF;
   color: #ff14f3;
-  opacity: 0.95;
   transition: transform 150ms ease, color 200ms;
   transform: scale(1.08) rotate(-1.5deg);
   /* transition: box-shadow 400ms ease 0s;
