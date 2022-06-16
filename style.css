@@ -225,6 +225,17 @@ h6 {
   margin-top: 1rem;
 }
 
+.minor-client-link-container{
+  margin-top: 6px;
+}
+
+.project-link-container li, .minor-client-link-container li{
+  margin-bottom: 8px;
+}
+.project-link-container li:last-of-type, .minor-client-link-container li:last-of-type {
+  margin-bottom: 0;
+}
+
 
 a {
   cursor: pointer;
