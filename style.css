@@ -231,7 +231,8 @@ h6 {
   margin-top: 6px;
 }
 
-.project-link-container li, .minor-client-link-container li{
+.project-link-container li, .minor-client-link-container {
+  font-size: 14px;
   margin-bottom: 8px;
 }
 .project-link-container li:last-of-type, .minor-client-link-container li:last-of-type {
