@@ -114,11 +114,13 @@ h6 {
 }
 
 .topbar {
-  font-family: 'Pacifico', cursive;
   height: 60px;
   font-size: 30px;
   line-height: 60px;
   background: #00e0ff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   /* background: linear-gradient(45deg, #05c726, hsl(157deg 89% 45%)); */
 }
 
