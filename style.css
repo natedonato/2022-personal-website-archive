@@ -474,3 +474,46 @@ a:hover {
 
   }
 }
+
+
+.testimonial-card{
+  text-align: left;
+  font-style: italic;
+  border-radius: 12px;
+  padding: 10px 40px;
+  width: 600px;
+  background: white;
+  margin: 0 auto;
+}
+
+.testimonial-img{
+  border-radius: 100%;
+  width: 80px;
+}
+
+.testimonial-bio-container{
+  font-style: normal;
+  margin-top: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.testimonial-meta{
+  width: 390px;
+  padding: 0px 30px;
+}
+
+.testimonial-disclosure{
+  font-style: normal;
+  font-size: 15px;
+  opacity: 0.4;
+  margin-top: 20px;
+  text-align: center;
+
+}
+
+.testimonial-company img{
+  width: 16px;
+  height: 16px;
+}
