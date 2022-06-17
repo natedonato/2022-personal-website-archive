@@ -238,9 +238,11 @@ h6 {
 
 .minor-client-link-container{
   margin-top: 6px;
+  padding-left: 0;
+  list-style: none;
 }
 
-.project-link-container li, .minor-client-link-container {
+.project-link-container li, .minor-client-link-container li {
   font-size: 14px;
   margin-bottom: 8px;
 }
