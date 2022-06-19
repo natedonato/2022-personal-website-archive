@@ -295,10 +295,12 @@ a:hover {
 }
 
 .hero-wrapper {
+  justify-content: flex-end;
+  margin-top: -40px;
   display: flex;
   max-width: 1000px;
   margin: 0 auto;
-  justify-content: center;
+  /* justify-content: center; */
   align-items: center;
   margin-bottom: -100px;
 }
@@ -308,10 +310,13 @@ a:hover {
 }
 
 .face-container {
-  height: 390px;
-  width: auto;
   position: relative;
+  height: 200px;
+  margin-top: -100px;
+  width: auto;
+  z-index: 20;
 }
+
 
 .face{
   will-change: transform;
@@ -327,6 +332,19 @@ a:hover {
   width: 100px;
   margin-right: 30px;
   flex-shrink: 0;
+}
+
+
+@media only screen and (min-width: 900px) {
+  .face-container{
+    margin-bottom: -1230px;
+    height: 1400px;
+  }
+
+  .circle-img{
+    top: 10px;
+  }
+
 }
 
 .clip1 {
