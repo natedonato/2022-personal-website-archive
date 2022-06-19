@@ -1,4 +1,10 @@
 @font-face {
+  font-family: 'Roboto Slab';
+  src: url('fonts/RobotoSlab-VariableFont_wght.ttf') format("truetype-variations");
+  font-weight: 1 999;
+} 
+
+@font-face {
   font-family: 'LatinModernMono';
   src: url('fonts/lmmono10-regular.otf') format('opentype');
   font-weight: normal;
@@ -531,5 +537,99 @@ a:hover {
   .testimonial-card{
     max-width: calc(100% - 24px);
 
+  }
+}
+
+
+.home-hero{
+  position: relative;
+  background-color: #fffa00;
+  padding-top: 70px;
+  height: 600px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.home-hero-text{
+  position: relative;
+  z-index: 10;
+  white-space: pre;
+  text-align: left;
+  font-family: "Roboto Slab";
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 134%;
+}
+
+.home-hero-bottom{
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+
+.home-hero-content{
+  display: flex;
+  justify-content: center;
+}
+
+
+.hero-img-container{
+  z-index: 1;
+  flex-shrink: 0;
+
+    margin-left: -100px;
+    margin-right: -40px;
+    margin-top: -100px;
+    flex-shrink: 0;
+    width: 600px;
+  /* transform: translate(0, 600px); */
+  will-change: transform;
+  transform: translate(0, 600px);
+
+  animation: popmein 1.3s cubic-bezier(0.67, -0.03, 0.81, 1.37) forwards;
+  animation-delay: 0.2s;
+}
+
+.hero-img-container:hover #nate1{
+  display: none;
+}
+
+.hero-img-container:hover #nate2{
+  display: block !important;
+}
+
+#nate2:hover{
+  animation: hue-animation 0.8s forwards;
+  animation-iteration-count: 2;
+  animation-delay: 0.3s;
+}
+
+
+@keyframes popmein{
+  0%{
+  transform: translate(0, 600px) rotate( -20deg ) scale(0.4); 
+  }
+  100%{
+    transform: translate(0, 0px);
+  }
+
+}
+
+
+@keyframes hue-animation {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  
+  50% {
+    filter: hue-rotate(360deg);
+  }
+  
+  100% {
+    filter: hue-rotate(0deg);
   }
 }
