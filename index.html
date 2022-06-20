@@ -72,9 +72,23 @@
     <div class="home-hero">
       <div class="home-hero-content">
         <div class="hero-img-container">
-          <img id="nate1" src="img/small/nate1s.png" alt="That's me, Nate Donato!">
-          <img id="nate2" style="display: none; margin-left: -14px;" src="img/small/nate2s.png" alt="That's me, Nate Donato!">
-        </div>
+
+                  <picture id="nate1">
+                    <source media="(max-width: 799px)" srcset="img/small/nate1300.png">
+                    <source media="(min-width: 800px)" srcset="img/small/nate1.png">
+                    <img  src="img/small/nate1.png" alt="That's me, Nate Donato!">
+                  </picture>
+                  
+                  <picture style="display: none;" id="nate2">
+                    <source media="(max-width: 799px)" srcset="img/small/nate2300.png">
+                    <source media="(min-width: 800px)" srcset="img/small/nate2.png">
+                    <img  src="img/small/nate2.png" alt="That's me, Nate Donato!">
+                  </picture>
+
+=
+          <!-- <img id="nate1" src="img/small/nate1s.png" alt="That's me, Nate Donato!">
+          <img id="nate2" style="display: none; margin-left: -14px;" src="img/small/nate2s.png" alt="That's me, Nate Donato!"> -->
+        </div> 
       <div class="home-hero-text">I'M NATE DONATO AND I MAKE THINGS.
 LIKE SWEET WEBSITES WITH MODERN
 TOOLSETS. AS A CREATIVE SOFTWARE
