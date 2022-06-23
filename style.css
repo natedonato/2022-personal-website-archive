@@ -187,7 +187,32 @@ h6 {
 .card-detail{
   width: 66%;
   padding: 0px 20px;
+  background-color: white;
+  position: relative;
 }
+
+.card-detail::before{
+      content: "";
+    position: absolute;
+    top: 140px;
+    left: -0.75rem;
+    right: auto;
+    height: 0px;
+    width: 0px;
+    border-top: 0.75rem solid transparent;
+    border-bottom: 0.75rem solid transparent;
+    border-left: none;
+    border-right: 0.75rem solid rgb(255, 255, 255);
+}
+
+.card:nth-of-type(even) .card-detail:before{
+  left: auto;
+  right: -0.75rem;
+  border-left: 0.75rem solid rgb(255, 255, 255);
+  border-right: none;
+}
+
+
 .card-img-container{
   width: 33%;
   /* display: flex;
@@ -224,6 +249,11 @@ h6 {
 
     .card-detail{
       width: 100%;
+      background-color: unset;
+    }
+    
+    .card-detail::before{
+      display: none;
     }
 }
 
