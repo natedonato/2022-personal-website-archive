@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="preload" href="/fonts/RobotoSlab-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="/fonts/lmmono10-regular.otf" as="font" type="font/otf" crossorigin>
+  <link rel="preload" href="/fonts/lmmono10-italic.otf" as="font" type="font/otf" crossorigin>
   <link rel="stylesheet" href="style.css" />
   <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -247,8 +248,8 @@ isolating problem areas, resulting in rapid recovery times and reduced interrupt
         </li>
         <li>Implemented complete redesign of the static company landing site including creating custom CSS and JavaScript
         animations, following best practices for SEO, and writing native JavaScript solutions to replace legacy jQuery scripts
-        </li>
         for page speed optimization
+        </li>
         <li>Added customer facing styled React components to the user dashboard including interfacing with Plaid for money
         transfers, advanced user profile settings, as well as fixed bugs relating to login / onboarding flow
         </li>
@@ -594,29 +595,29 @@ isolating problem areas, resulting in rapid recovery times and reduced interrupt
   </footer>
 
   <script>
-    function scrollStop(callback, refresh = 66) {
-      // Make sure a valid callback was provided
-      if (!callback || typeof callback !== "function") return;
+    // function scrollStop(callback, refresh = 66) {
+    //   // Make sure a valid callback was provided
+    //   if (!callback || typeof callback !== "function") return;
 
-      // Setup scrolling variable
-      let isScrolling;
+    //   // Setup scrolling variable
+    //   let isScrolling;
 
-      // Listen for scroll events
-      window.addEventListener(
-        "scroll",
-        function (event) {
-          // Clear our timeout throughout the scroll
-          window.clearTimeout(isScrolling);
+    //   // Listen for scroll events
+    //   window.addEventListener(
+    //     "scroll",
+    //     function (event) {
+    //       // Clear our timeout throughout the scroll
+    //       window.clearTimeout(isScrolling);
 
-          // Set a timeout to run after scrolling ends
-          isScrolling = setTimeout(callback, refresh);
-        },
-        false
-      );
-    }
-    let face = document.getElementById("face");
-    let face1 = document.getElementById("face1");
-    let face2 = document.getElementById("face2");
+    //       // Set a timeout to run after scrolling ends
+    //       isScrolling = setTimeout(callback, refresh);
+    //     },
+    //     false
+    //   );
+    // }
+    // let face = document.getElementById("face");
+    // let face1 = document.getElementById("face1");
+    // let face2 = document.getElementById("face2");
 
     // let nate1 = document.getElementById("nate1");
 
@@ -626,23 +627,23 @@ isolating problem areas, resulting in rapid recovery times and reduced interrupt
     //   nate1.parentElement.classList.remove('img-loading');
     // }
 
-    function rotateMan() {
-      let offsetTop = window.scrollY;
-      let style = `rotate(${offsetTop}deg)`;
-      face.style.transform = style;
+    // function rotateMan() {
+    //   let offsetTop = window.scrollY;
+    //   let style = `rotate(${offsetTop}deg)`;
+    //   face.style.transform = style;
 
-      face2.style.display = "block";
-      face1.style.display = "none";
-    }
+    //   face2.style.display = "block";
+    //   face1.style.display = "none";
+    // }
 
-    window.addEventListener("scroll", (e) => {
-      requestAnimationFrame(rotateMan)
-    });
+    // window.addEventListener("scroll", (e) => {
+    //   requestAnimationFrame(rotateMan)
+    // });
 
-    scrollStop(() => {
-      face1.style.display = "block";
-      face2.style.display = "none";
-    }, 40);
+    // scrollStop(() => {
+    //   face1.style.display = "block";
+    //   face2.style.display = "none";
+    // }, 40);
   </script>
 </body>
 
