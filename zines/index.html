@@ -11,16 +11,17 @@
   <div>
   <ul>
   <li class="zine-item">
-    <div>
-    <strong>
-      A Relatable Human Experience
-    </strong>
-    <br>
-    <small>2017</small>
-    <br>
-    <br>
-    <a target="_blank" href="./relatable-zine-2017.pdf">download pdf</a>
-    <br>
+    <img class="zine-cover" src="./relatable-human-experience.png" alt="">
+    <div class="zine-detail">
+      <strong>
+        A Relatable Human Experience
+      </strong>
+      <br>
+      <small>2017</small>
+      <br>
+      <br>
+      <a target="_blank" href="./relatable-zine-2017.pdf">download pdf</a>
+      <br>
   </div>
   <br>
     <div class="print-notes">
@@ -37,7 +38,8 @@
   </li>
   <br>
   <li class="zine-item">
-    <div>
+    <img class="zine-cover" src="./no-exact-process.png" alt="">
+    <div class="zine-detail">
     <strong>
       THERE IS NO EXACT PROCESS
     </strong>
@@ -63,7 +65,8 @@
   </li>
   <br>
   <li class="zine-item">
-    <div>
+    <img class="zine-cover" src="./help-no.png" alt="">
+    <div class="zine-detail">
     <strong>
       Help-No
     </strong>
@@ -89,7 +92,8 @@
   </li>
   <br>
   <li class="zine-item">
-    <div>
+    <img class="zine-cover" src="./six-steps-2.png" alt="">
+    <div class="zine-detail">
       <strong>
         Six Simple Steps to Enlightenment
       </strong>
@@ -115,7 +119,8 @@
   </li>
   <br>
   <li class="zine-item">
-    <div>
+    <img class="zine-cover" src="./ms-word-mini.png" alt="">
+    <div class="zine-detail">
       <strong>
         MS WORD Mini Zine
       </strong>
@@ -165,10 +170,23 @@
     padding: 20px;
     border-radius: 6px;
     display: flex;
-    width: 450px;
+    width: 650px;
     justify-content: space-between;
     align-items: center;
     margin: 0 auto;
+  }
+
+  .zine-cover{
+    height: 200px;
+    width: auto;
+    border: 1px solid black;
+    box-shadow: rgb(38 57 77) 8px -4px 30px -12px;
+    transform: rotateX(15deg) rotateY(15deg);
+  }
+
+  .zine-detail{
+    padding: 20px;
+    text-align: left;
   }
 
   .print-notes{
@@ -205,11 +223,24 @@
     .zine-item{
       width: 240px;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
     }
 
     .print-notes{
       width: 100%;
+    }
+
+
+    .zine-cover{
+      margin-top: -40px;
+
+      width: 45%;
+      height: auto;
+      transform: translate(80%) rotate(25deg);
+      border: 1px solid #000000;
+      
+      box-shadow: rgb(38 57 77) 20px -4px 30px -12px
+
     }
 
   }
