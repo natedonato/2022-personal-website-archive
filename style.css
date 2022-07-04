@@ -129,7 +129,7 @@ h6 {
   font-weight: 800;
   padding: 20px 5px;
   white-space: nowrap;
-  animation: marquee 45s linear infinite;
+  animation: marquee 75s linear infinite;
 }
 
 .ticker:hover {
