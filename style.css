@@ -5,15 +5,15 @@
   /* font-display: swap; */
   text-rendering: optimizeLegibility;
 }
-
+/* 
 @font-face {
   font-family: 'LatinModernMono';
   src: url('cv/fonts/lmmono10-italic.otf') format('opentype');
   font-style: italic;
   font-weight: normal;
-  /* font-display: swap; */
   text-rendering: optimizeLegibility;  
-}
+} */
+
 /* 
 @font-face {
   font-family: 'LatinModernMonoBold';
@@ -336,7 +336,7 @@ h6 {
 
 a {
   cursor: pointer;
-  font-style: italic;
+  /* font-style: italic; */
   color: #2154FF;
   display: inline-block;
   text-decoration: none;
