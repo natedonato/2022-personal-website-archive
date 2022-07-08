@@ -20,7 +20,39 @@
   <title>Nate Donato</title>
   <meta name="description"
     content="I'm Nate Donato, a software engineer and web developer.  Experienced in JavaScript, React, Vue, PSQL, SSR / SSG, and more" />
+  <style>
 
+
+.hero-img-container{
+  z-index: 1;
+  flex-shrink: 0;
+  margin-left: -100px;
+  margin-right: -40px;
+  margin-top: -100px;
+  flex-shrink: 0;
+  width: 600px;
+  /* transform: translate(0, 600px); */
+  will-change: transform;
+  transform: translate(0, 110%);
+  animation: popmein 0.7s cubic-bezier(0.63, 0.31, 0.62, 1.23) forwards;
+  animation-delay: 1.2s;
+}
+.hero-img-container .img-loading{
+  animation-play-state: paused !important;
+}
+.hero-img-container:hover #nate1{
+  display: none;
+}
+.hero-img-container:hover #nate2{
+  display: block !important;
+}
+#nate2:hover{
+  animation: hue-animation 0.6s forwards;
+  animation-iteration-count: 2;
+  animation-delay: 0.6s;
+}
+
+  </style>
 </head>
 
 <body style="background-color: #eeeeee; text-align: center">
