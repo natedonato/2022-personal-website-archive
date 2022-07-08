@@ -260,7 +260,7 @@
 
 </style>
 <script>
-  let zines = document.querySelectorAll("li");
+  let zines = [...document.querySelectorAll("li")].slice(1);
   let size = 120;
   zines.forEach(zine => zine.style.transform = `translate(${Math.random()* size - 0.5*size}px)`)
 </script>
