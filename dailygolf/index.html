@@ -11,37 +11,40 @@
   <script src="./rough.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js">
 </script>
-  <script>
-    let seed = new Date();    
+</head>
+
+<body>
+
+  <div id="date"></div>
+  <a id="yesterday">yesterday's game</a>
+
+</body>
+
+<script>
+
+  let seed = new Date();
     const urlParams = new URLSearchParams(window.location.search);
 
-    let code = urlParams.get('seed');
-    if(code && code.length > 0){
+    let code = urlParams.get('date');
+    if (code && code.length > 0) {
       console.log(code)
-      seed = new Date(code*1000)
+      seed = new Date(code * 1000)
       console.log(seed.toDateString("en"))
     }
 
     let lastSeed = new Date();
     lastSeed.setTime(seed.getTime() - (24 * 60 * 60 * 1000));
-    // lastSeed.setTime(seed.getTime() );
-    console.log(parseInt(lastSeed.getTime() / 1000).toFixed(0))
-
-    // console.log(seed);
-
-    // let seed = ("test")
-    // let alphabet = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
 
     let rng = new Math.seedrandom(seed.toLocaleDateString("en"));
+    document.getElementById('date').textContent = seed.toLocaleDateString("en");
+
+    document.getElementById('yesterday').setAttribute("href", `?date=${parseInt(lastSeed.getTime() / 1000).toFixed(0)}`)
 
     let nateRand = () => rng.quick();
-  </script>
-</head>
 
-<body>
-</body>
 
-<script>
+
+
   function between(min, max) {
     return Math.floor(nateRand() * (max + 1 - min) + min);
   }
@@ -487,6 +490,7 @@
     /* overflow: hidden; */
     height: 100%;
     /* margin: 5px; */
+    margin-bottom: 100px;
   }
 
 
