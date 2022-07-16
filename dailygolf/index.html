@@ -121,7 +121,7 @@
 
 
   let nid = 10;
-  let width = 1600;
+  let width = 2400;
   let height = 2400;
 
   function randomGround() {
@@ -613,7 +613,7 @@
       clickPos = getMousePos(canvas, e);
     // console.log("mouseDown", clickPos)
   });
-  document.addEventListener("touchstart", (e) => {
+  canvas.addEventListener("touchstart", (e) => {
         e.preventDefault();
 
       clickPos = getMousePos(canvas, e);
@@ -626,7 +626,7 @@
     }
   })
 
-  document.addEventListener("touchmove",e=>{
+  canvas.addEventListener("touchmove",e=>{
     e.preventDefault();
     if(clickPos.x !== null){
       mousePos = getMousePos(canvas, e);
