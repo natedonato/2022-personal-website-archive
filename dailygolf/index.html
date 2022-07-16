@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matter.js proj</title>
+      <link href="https://fonts.googleapis.com/css?family=Gloria+Hallelujah&display=block" rel="stylesheet" />
+  <script src="./matter.js"></script>
+  <script src="./rough.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js">
+</script>
+  <script>
+    let seed = new Date();    
+    const urlParams = new URLSearchParams(window.location.search);
+
+    let code = urlParams.get('seed');
+    if(code && code.length > 0){
+      console.log(code)
+      seed = new Date(code*1000)
+      console.log(seed.toDateString("en"))
+    }
+
+    let lastSeed = new Date();
+    lastSeed.setTime(seed.getTime() - (24 * 60 * 60 * 1000));
+    // lastSeed.setTime(seed.getTime() );
+    console.log(parseInt(lastSeed.getTime() / 1000).toFixed(0))
+
+    // console.log(seed);
+
+    // let seed = ("test")
+    // let alphabet = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+
+    let rng = new Math.seedrandom(seed.toLocaleDateString("en"));
+
+    let nateRand = () => rng.quick();
+  </script>
+</head>
+
+<body>
+</body>
+
+<script>
+  function between(min, max) {
+    return Math.floor(nateRand() * (max + 1 - min) + min);
+  }
+
+  // module aliases
+
+  const Engine = Matter.Engine,
+    Render = Matter.Render,
+    Runner = Matter.Runner,
+    Bodies = Matter.Bodies,
+    Body = Matter.Body,
+    Composites = Matter.Composites,
+    Composite = Matter.Composite,
+    // MouseConstraint = Matter.MouseConstraint,
+    Constraint = Matter.Constraint,
+    Vector = Matter.Vector,
+    Vertices = Matter.Vertices,
+    Events = Matter.Events;
+
+  // create an engine
+  const engine = Engine.create();
+  engine.timing.timescale = 0.4
+
+  // let stack = Composites.stack(350, 355, 10, 6, 0, 0, function(x, y) {
+  //       return Bodies.rectangle(x, y, 30, 30);
+  //   });
+
+  // let ground = Bodies.rectangle(200, 1000, 300, 50, {
+  //  isStatic: true,
+  //  render: {
+  //   id: 1,
+  //   fill: null,
+  //   stroke: 'red',
+  //   fillStyle: 'none',
+  //   type: "ground"
+  // }});
+
+
+  // let ground2 = Bodies.rectangle(800, 1100, 300, 50, {
+  //  isStatic: true,
+  //  render: {
+  //   id: 2,
+  //   fill: null,
+  //   stroke: 'red',
+  //   fillStyle: 'none',
+  //   type: "ground"
+  // }});
+
+  // let ground3 = Bodies.rectangle(1100, 1500, 300, 50, {
+  //  isStatic: true,
+  //  render: {
+  //   id: 3,
+  //   fill: null,
+  //   stroke: 'red',
+  //   fillStyle: 'none',
+  //   type: "ground"
+  // }});
+
+
+  // let ground4 = Bodies.rectangle(1100, 600, 300, 50, {
+  //  isStatic: true,
+  //  render: {
+  //   id: 4,
+  //   fill: null,
+  //   stroke: 'red',
+  //   fillStyle: 'none',
+  //   type: "ground"
+  // }});
+
+
+
+
+  let nid = 10;
+  let width = 1600;
+  let height = 2400;
+
+  function randomGround() {
+    let w = between(250, 450)
+    let h = between(50, 90);
+    let y = between(400, height - 200)
+    let x = between(w / 2 + 20, width - w / 2 - 20)
+    nid += 1;
+
+    return Bodies.rectangle(x, y, w, h, {
+      isStatic: true,
+      render: {
+        id: nid,
+        fill: null,
+        stroke: 'red',
+        fillStyle: 'none',
+        type: "ground"
+      }
+    });
+  }
+
+  let platforms = [];
+  for (let i = 0; i < between(4, 12); i++) {
+    platforms.push(randomGround());
+  }
+
+  platforms = platforms.sort((a, b) => a.position.x - b.position.x)
+
+
+  function dist(bod1, bod2) {
+    return Math.sqrt((bod1.position.x - bod2.position.x) ** 2 + (bod1.position.y - bod2.position.y) ** 2);
+  }
+  function checkOverlap(radius, Xc, Yc, rect) {
+
+    let X1 = rect.bounds.min.x;
+    let X2 = rect.bounds.max.x;
+
+    let Y1 = rect.bounds.min.y;
+    let Y2 = rect.bounds.max.y;
+
+
+
+    // Find the nearest point on the
+    // rectangle to the center of
+    // the circle
+    let Xn = Math.max(X1, Math.min(Xc, X2));
+    let Yn = Math.max(Y1, Math.min(Yc, Y2));
+
+    // Find the distance between the
+    // nearest point and the center
+    // of the circle
+    // Distance between 2 points,
+    // (x1, y1) & (x2, y2) in
+    // 2D Euclidean space is
+    // ((x1-x2)**2 + (y1-y2)**2)**0.5
+    let Dx = Xn - Xc;
+    let Dy = Yn - Yc;
+    return (Dx * Dx + Dy * Dy) <= radius * radius;
+  }
+
+
+
+  let overlap = true;
+  let Cx = platforms[0].position.x
+  let Cy = platforms[0].position.y - 10;
+  let rad = 10;
+
+  while (overlap) {
+    overlap = false;
+    platforms.forEach(plat => {
+      if (checkOverlap(rad + 5, Cx, Cy - 5, plat) === true) {
+        Cy = plat.bounds.min.y - rad - 0.01;
+        overlap = true;
+      }
+    })
+  }
+
+  let ball = Bodies.circle(Cx, Cy - rad, rad, {
+    restitution: 0.4,
+    density: 0.004,
+    render: {
+      track: true,
+      type: "ball",
+      fillStyle: "blue"
+    }
+  })
+
+
+  platforms = platforms.sort((a, b) => dist(a, ball) - dist(b, ball))
+  platforms[0].render.fill = "orange";
+  platforms[platforms.length - 1].render.fill = "green";
+
+
+  function reset() {
+    Body.setVelocity(ball, { x: 0, y: 0 })
+    Body.setPosition(ball, { x: Cx, y: Cy })
+    pastPoints = pastPoints.concat(points);
+    points = []
+  }
+
+  // add all of the bodies to the world
+
+  Composite.add(engine.world, [
+    // stack, boxA, boxB,
+    // ground, 
+    // ground2, 
+    // ground3,
+    // ground4,
+    ...platforms,
+    ball,
+    // Constraint.create({
+    //   bodyA: ground,
+    //   pointB: Vector.clone(ground.position),
+    //   stiffness: 1,
+    //   length: 0,
+    //   render: {
+    //     fillStyle: "black",
+    //     strokeStyle: "black",
+    //     lineWidth: 0,
+    //   }
+    // })
+  ]);
+
+  // run the renderer
+  // Render.run(renderInst);
+
+  //    Render.lookAt(renderInst, {
+  //       min: { x: 0, y: 0 },
+  //       max: { x: 1600, y: 1600 }
+  //     });
+
+
+  // create runner
+  let runner = Runner.create({ isFixed: true });
+  // runner.isFixed = true;
+
+  // run the engine
+  Runner.run(runner, engine);
+
+
+  /** @type {HTMLCanvasElement} */
+  const canvas = document.createElement('canvas');
+  const rc = rough.canvas(canvas);
+
+  let generator = rc.generator;
+  let gs = {};
+
+
+  ctx = canvas.getContext('2d');
+  canvas.width = width;
+  canvas.height = height;
+  document.body.appendChild(canvas);
+
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = '#ff0';
+  ctx.fillStyle = '#000';
+
+  let points = [];
+  let pastPoints = [];
+  let scribbles = [];
+  let strokes = 0;
+
+  let clicks = [];
+
+  let lines = generator.rectangle(0, 0, canvas.width, canvas.height, { fill: "rgba(0, 0, 255, 0.39)", hachureAngle: 90, strokeWidth: 5, hachureGap: 65, seed: 5 })
+
+
+
+  function render() {
+
+    // clear previous
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    rc.draw(lines)
+
+
+    scribbles.forEach(scrib => {
+      ctx.strokeStyle = "orange"
+      ctx.lineWidth = 2;
+      ctx.stroke(scrib);
+    })
+
+    // plot past points
+    points.forEach(point => {
+      // rc.circle(point.x, point.y, 20,{stroke: "blue", fill: "blue", roughness: 0.2, fillStyle: ""});
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, 4, 2 * Math.PI, false);
+      ctx.fillStyle = "black";
+      ctx.fillStyle = "black";
+      ctx.fill()
+      ctx.closePath();
+    })
+    ctx.strokeStyle = "black"
+    ctx.lineWidth = 1
+
+    // plot past points
+    pastPoints.forEach(point => {
+      // rc.circle(point.x, point.y, 20,{stroke: "blue", fill: "blue", roughness: 0.2, fillStyle: ""});
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, 4, 2 * Math.PI, false);
+      ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+      ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+      ctx.fill()
+      ctx.closePath();
+    })
+    ctx.strokeStyle = "black"
+    ctx.lineWidth = 1
+
+
+
+    // get bodies
+    let bodies = Composite.allBodies(engine.world);
+
+    for (let i = 0; i < bodies.length; i += 1) {
+      let nextBody = bodies[i];
+      ctx.beginPath();
+      let vertices = bodies[i].vertices;
+      if (nextBody.render.track === true) {
+        let center = Vertices.centre(vertices);
+        if (points.length < 1) {
+          points.push(center);
+        }
+        let dist = Math.sqrt((center.x - points[points.length - 1].x) ** 2 + (center.y - points[points.length - 1].y) ** 2);
+        if (dist > 15) {
+          points.push(center);
+        }
+      }
+
+
+      if (nextBody.render.type === "ground") {
+        let id = nextBody.render.id;
+
+        if (gs[id] === undefined) {
+          let g = generator.polygon(vertices.map(el => [el.x, el.y]), {
+            stroke: nextBody.render.stroke, strokeWidth: 3,
+            fill: nextBody.render.fill,
+            fillStyle: nextBody.render.fillStyle,
+            seed: between(1, 99999)
+          });
+
+          gs[id] = g;
+        }
+
+        rc.draw(gs[id]);
+
+
+
+      } else {
+        ctx.fillStyle = 'black';
+        ctx.strokeStyle = 'black'
+        ctx.lineWidth = 3;
+        ctx.moveTo(vertices[0].x, vertices[0].y);
+        for (let j = 1; j < vertices.length; j += 1) {
+          ctx.lineTo(vertices[j].x, vertices[j].y);
+        }
+        ctx.lineTo(vertices[0].x, vertices[0].y);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+
+
+
+    }
+    if(ball.position.y > height || ball.position.x < 0 || ball.position.x > width){
+      reset();
+    }
+
+    ctx.fillStyle = "black";
+    ctx.font = '52px Gloria Hallelujah'
+    ctx.fillText(
+      `bombs: ${bombCount} strokes: ${strokes}`,
+      100,100
+    )
+
+    window.requestAnimationFrame(render);
+  }
+  window.requestAnimationFrame(render);
+
+  let bombCount = 2;
+
+  Events.on(engine, "collisionActive", (e) => {
+
+    let pairs = e.pairs;
+    // console.log(pairs)
+
+    for(let i = 0; i < pairs.length; i++){
+      if(bombCount < 2 && ball.velocity.x ** 2 < 0.001 && ball.velocity.y ** 2 < 0.001 && (pairs[i].bodyA.render?.type === 'ball' ||  pairs[i].bodyB.render?.type === 'ball')){
+
+        bombCount = 2;
+        console.log('bombs refilled')
+      }
+    }
+  })
+
+  document.addEventListener("click", (e) => {
+
+    let mousePos = getMousePos(canvas, e);
+    let ballPos = ball.position;
+
+    let dist = Math.sqrt((ballPos.x - mousePos.x) ** 2 + (ballPos.y - mousePos.y) ** 2);
+
+
+    let max = 200
+
+    if (dist > max) {
+      dist = max;
+    }
+
+    if (dist < 25) {
+      dist = 25;
+    }
+
+    dist = (max - dist) / max
+
+    let angle = -Math.atan2(ballPos.y - mousePos.y, ballPos.x - mousePos.x)
+
+
+    let x = Math.cos(angle);
+    let y = Math.sin(angle);
+
+    x = x * 14 * 0.01 * dist
+    y = y * 14 * 0.01 * dist
+
+    if(bombCount > 0){
+
+    Body.applyForce(ball, ball.position, { x: x, y: -y })
+    strokes += 1;
+    bombCount -= 1;
+    }
+
+    // scribbles.push(scribblePoints((ballPos.x - mousePos.x) / 2 + mousePos.x,(ballPos.y-mousePos.y) / 2 + mousePos.y, 140 * dist + 80, 80 * dist + 40))
+
+  })
+
+  //explosion scribbles, depricated
+  function scribblePoints(x, y, size, num) {
+    let points = [];
+
+    let path = new Path2D();
+
+    for (let i = 0; i < num; i++) {
+      let point = { x: x + between(-size / 2, size / 2), y: y + between(-size / 2, size / 2) }
+      points.push(point);
+    }
+
+    path.moveTo(points[0].x, points[0].y);
+
+    for (let i = 1; i < points.length; i++) {
+      path.lineTo(points[i].x, points[i].y);
+    }
+
+    return path;
+  }
+
+  // get relative coordinate of mouse 
+  function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: (evt.clientX - rect.left) / (rect.right - rect.left) * canvas.width,
+      y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
+    };
+  }
+
+</script>
+<style>
+  body,
+  html {
+    /* overflow: hidden; */
+    height: 100%;
+    /* margin: 5px; */
+  }
+
+
+  canvas {
+    display: block;
+    margin: 5px auto;
+    max-width: min(100%, 95vmin);
+    max-height: min(100%, 95vmin);
+    width: auto;
+    height: auto;
+    border: 1px solid black;
+  }
+</style>
+
+</html>
