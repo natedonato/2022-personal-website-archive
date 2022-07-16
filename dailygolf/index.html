@@ -613,6 +613,12 @@
       clickPos = getMousePos(canvas, e);
     // console.log("mouseDown", clickPos)
   });
+  document.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+
+      clickPos = getMousePos(canvas, e);
+    // console.log("mouseDown", clickPos)
+  });
 
   document.addEventListener("mousemove",e=>{
     if(clickPos.x !== null){
@@ -620,17 +626,27 @@
     }
   })
 
-  document.addEventListener("mouseup", (e) => {
-    
-    let mousePos = getMousePos(canvas, e);
+  document.addEventListener("touchmove",e=>{
+    e.preventDefault();
+    if(clickPos.x !== null){
+      mousePos = getMousePos(canvas, e);
+    }
+  })
+
+  document.addEventListener("mouseup", 
+    mouseUp
+  )
+  document.addEventListener("touchend", 
+    mouseUp
+  )
+
+  function mouseUp(e){
+    console.log('mouseup')
+    console.log(e)
+
+    // let mousePos = getMousePos(canvas, e);
     let ballPos = ball.position;
-
-
-
-
     let dist = Math.sqrt((clickPos.x - mousePos.x) ** 2 + (clickPos.y - mousePos.y) ** 2);
-
-
     let max = 400
 
     if (dist > max) {
@@ -660,9 +676,10 @@
     }
 
     clickPos = {x: null,y: null}
+    mousePos = {x: null,y: null}
     // scribbles.push(scribblePoints((ballPos.x - mousePos.x) / 2 + mousePos.x,(ballPos.y-mousePos.y) / 2 + mousePos.y, 140 * dist + 80, 80 * dist + 40))
 
-  })
+  }
 
   //explosion scribbles, depricated
   function scribblePoints(x, y, size, num) {
@@ -686,10 +703,15 @@
 
   // get relative coordinate of mouse 
   function getMousePos(canvas, evt) {
-    var rect = canvas.getBoundingClientRect();
+    console.log(evt)
+ 
+    
+
+    let rect = canvas.getBoundingClientRect();
+    
     return {
-      x: (evt.clientX - rect.left) / (rect.right - rect.left) * canvas.width,
-      y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
+      x: (evt.clientX || evt.targetTouches[0].pageX - rect.left) / (rect.right - rect.left) * canvas.width,
+      y: (evt.clientY || evt.targetTouches[0].pageY - rect.top) / (rect.bottom - rect.top) * canvas.height
     };
   }
 
