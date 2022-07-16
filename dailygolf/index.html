@@ -618,7 +618,7 @@
 
       clickPos = getMousePos(canvas, e);
     // console.log("mouseDown", clickPos)
-  });
+  }, { passive: false });
 
   document.addEventListener("mousemove",e=>{
     if(clickPos.x !== null){
@@ -631,7 +631,7 @@
     if(clickPos.x !== null){
       mousePos = getMousePos(canvas, e);
     }
-  })
+  }, { passive: false })
 
   document.addEventListener("mouseup", 
     mouseUp
@@ -642,7 +642,6 @@
 
   function mouseUp(e){
     console.log('mouseup')
-    console.log(e)
 
     // let mousePos = getMousePos(canvas, e);
     let ballPos = ball.position;
@@ -703,10 +702,6 @@
 
   // get relative coordinate of mouse 
   function getMousePos(canvas, evt) {
-    console.log(evt)
- 
-    
-
     let rect = canvas.getBoundingClientRect();
     
     return {
