@@ -9,6 +9,7 @@
       <link href="https://fonts.googleapis.com/css?family=Gloria+Hallelujah&display=block" rel="stylesheet" />
   <script src="./matter.js"></script>
   <script src="./rough.js"></script>
+  <script src="./decomp.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js">
 </script>
 </head>
@@ -27,9 +28,7 @@
 
     let code = urlParams.get('date');
     if (code && code.length > 0) {
-      console.log(code)
       seed = new Date(code * 1000)
-      console.log(seed.toDateString("en"))
     }
 
     let lastSeed = new Date();
@@ -51,7 +50,10 @@
 
   // module aliases
 
+  let playing = true;
+
   const Engine = Matter.Engine,
+    Common = Matter.Common,
     Render = Matter.Render,
     Runner = Matter.Runner,
     Bodies = Matter.Bodies,
@@ -63,6 +65,7 @@
     Vector = Matter.Vector,
     Vertices = Matter.Vertices,
     Events = Matter.Events;
+    Common.setDecomp(decomp);
 
   // create an engine
   const engine = Engine.create();
@@ -125,7 +128,7 @@
     let w = between(250, 450)
     let h = between(50, 90);
     let y = between(400, height - 200)
-    let x = between(w / 2 + 20, width - w / 2 - 20)
+    let x = between(w / 2 + 100, width - w / 2 - 100)
     nid += 1;
 
     return Bodies.rectangle(x, y, w, h, {
@@ -138,6 +141,38 @@
         type: "ground"
       }
     });
+  }
+  let holeVertices;
+
+  function hole(){
+
+    let w = between(350, 550)
+    let h = between(140, 240);
+
+    let holeW = between(55, 85)
+    let holeH = between(75,85)
+    let edge = 50;
+
+    let holeX = between(edge, w-holeW - edge);
+
+    let slightOffset = 15;
+
+    let mediumOffset = 50;
+
+    let corners = [{x: 0, y: between(-slightOffset, slightOffset),},
+    {x: holeX, y: 0},
+    {x: holeX, y: holeH + between(0,slightOffset)},
+    {x: holeX + holeW, y: holeH + between(0,slightOffset)} ,
+    {x: holeX+holeW, y: between(-slightOffset, slightOffset)},
+    {x: w + between(-mediumOffset, mediumOffset), y: between(-slightOffset, slightOffset),},
+    {x: w + between(-mediumOffset, mediumOffset),y:h + between(-slightOffset, slightOffset)},
+    {x: 0 + between(-mediumOffset, mediumOffset), y: h}
+  ];
+
+  holeVertices = corners;
+
+  let myHole = Bodies.fromVertices(0,0, holeVertices,{ isStatic: true, render:{type: "hole"}})
+    return myHole;
   }
 
   let platforms = [];
@@ -186,6 +221,8 @@
   let Cy = platforms[0].position.y - 10;
   let rad = 10;
 
+
+  // replace this with a better function that generates a start and finish, and deletes any platforms in their "airspace"
   while (overlap) {
     overlap = false;
     platforms.forEach(plat => {
@@ -209,7 +246,36 @@
 
   platforms = platforms.sort((a, b) => dist(a, ball) - dist(b, ball))
   platforms[0].render.fill = "orange";
-  platforms[platforms.length - 1].render.fill = "green";
+
+
+  const myHole = hole();
+
+
+  Body.setPosition(myHole, platforms[platforms.length - 1].position);
+
+
+  let min = [...holeVertices].sort((a,b) => a.x - b.x)[0]
+  let min2 = [...myHole.vertices].sort((a,b) => a.x - b.x)[0]
+  
+
+  let offsetY = min.y - min2.y
+  let offsetX = min.x - min2.x
+  
+  holeVertices = holeVertices.map(el => ({x: el.x - offsetX, y: el.y - offsetY }));
+
+  let offsetY2 = holeVertices[1].y - myHole.position.y
+  let offsetX2 = holeVertices[1].x - myHole.position.x
+
+  let detector = Bodies.fromVertices(0, 0, [holeVertices[1], holeVertices[2], holeVertices[3], holeVertices[4]],{ isStatic: true, isSensor: true, render: {type: 'detector'}})
+
+    let centre = Vertices.centre([holeVertices[1], holeVertices[2], holeVertices[3], holeVertices[4]]);
+      Body.setPosition(detector, {
+        x: detector.position.x + centre.x,
+        y: detector.position.y + centre.y
+      });
+
+  platforms.pop();
+  myHole.render.fill = "green";
 
 
   function reset() {
@@ -217,10 +283,11 @@
     Body.setPosition(ball, { x: Cx, y: Cy })
     pastPoints = pastPoints.concat(points);
     points = []
+    redrawBg();
+    attempts += 1;
   }
 
   // add all of the bodies to the world
-
   Composite.add(engine.world, [
     // stack, boxA, boxB,
     // ground, 
@@ -229,6 +296,8 @@
     // ground4,
     ...platforms,
     ball,
+    myHole,
+    detector
     // Constraint.create({
     //   bodyA: ground,
     //   pointB: Vector.clone(ground.position),
@@ -242,7 +311,22 @@
     // })
   ]);
 
-  // run the renderer
+  // const renderInst = Render.create({
+  //   width: width,
+  //   height: height,
+  //   element: document.body,
+  //   engine: engine,
+  //   options: {
+  //     wireframes: false,
+  //     background: 'transparent',
+  //     pixelRatio: 2,
+  //     width: width,
+  //     height: height,
+  //     // showShadows: true,
+  //   }
+  // });
+
+  // // run the renderer
   // Render.run(renderInst);
 
   //    Render.lookAt(renderInst, {
@@ -281,53 +365,65 @@
   let scribbles = [];
   let strokes = 0;
 
+  let attempts = 1;
+
   let clicks = [];
 
-  let lines = generator.rectangle(0, 0, canvas.width, canvas.height, { fill: "rgba(0, 0, 255, 0.39)", hachureAngle: 90, strokeWidth: 5, hachureGap: 65, seed: 5 })
+
+   // make pagelines
+    let lines = generator.rectangle(0, 0, canvas.width, canvas.height, { fill: "rgba(0, 0, 255, 0.39)", hachureAngle: 90, strokeWidth: 5, hachureGap: 65, seed: 5 })
+
+    //hidden canvas?
+  const h_canvas = document.createElement('canvas');
+  h_canvas.width = width;
+  h_canvas.height = height;
+  const h_ctx = h_canvas.getContext('2d');
+  const h_rc = rough.canvas(h_canvas);
 
 
+  function redrawBg(){
+    h_ctx.clearRect(0,0,width,height);
+    h_rc.draw(lines)
 
+    // plot past points
+    h_ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+    pastPoints.forEach(point => {
+      h_ctx.beginPath();
+      h_ctx.arc(point.x, point.y, 4, 2 * Math.PI, false);
+      h_ctx.fill()
+    })
+  }
+  redrawBg();
+
+ 
+  let prevTime = new Date();
+  let fps = 0;
   function render() {
+    let currTime = new Date();
+    fps = 1000 / (currTime - prevTime);
+    prevTime = currTime;
 
     // clear previous
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(h_canvas, 0,0)
 
-    rc.draw(lines)
+    //draw bg lines
+    // rc.draw(lines)
 
 
-    scribbles.forEach(scrib => {
-      ctx.strokeStyle = "orange"
-      ctx.lineWidth = 2;
-      ctx.stroke(scrib);
-    })
+    // // plot current points
+    // ctx.fillStyle = "black";
+    // points.forEach(point => {
+    //   // rc.circle(point.x, point.y, 20,{stroke: "blue", fill: "blue", roughness: 0.2, fillStyle: ""});
+    //   ctx.beginPath();
+    //   ctx.arc(point.x, point.y, 4, 2 * Math.PI, false);
+    //   ctx.fill()
+    // })
 
-    // plot past points
-    points.forEach(point => {
-      // rc.circle(point.x, point.y, 20,{stroke: "blue", fill: "blue", roughness: 0.2, fillStyle: ""});
-      ctx.beginPath();
-      ctx.arc(point.x, point.y, 4, 2 * Math.PI, false);
-      ctx.fillStyle = "black";
-      ctx.fillStyle = "black";
-      ctx.fill()
-      ctx.closePath();
-    })
+
+
     ctx.strokeStyle = "black"
     ctx.lineWidth = 1
-
-    // plot past points
-    pastPoints.forEach(point => {
-      // rc.circle(point.x, point.y, 20,{stroke: "blue", fill: "blue", roughness: 0.2, fillStyle: ""});
-      ctx.beginPath();
-      ctx.arc(point.x, point.y, 4, 2 * Math.PI, false);
-      ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
-      ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
-      ctx.fill()
-      ctx.closePath();
-    })
-    ctx.strokeStyle = "black"
-    ctx.lineWidth = 1
-
-
 
     // get bodies
     let bodies = Composite.allBodies(engine.world);
@@ -336,19 +432,31 @@
       let nextBody = bodies[i];
       ctx.beginPath();
       let vertices = bodies[i].vertices;
+
+
+
+
       if (nextBody.render.track === true) {
         let center = Vertices.centre(vertices);
         if (points.length < 1) {
           points.push(center);
         }
         let dist = Math.sqrt((center.x - points[points.length - 1].x) ** 2 + (center.y - points[points.length - 1].y) ** 2);
-        if (dist > 15) {
+        if (dist > 9) {
           points.push(center);
+          h_ctx.fillStyle = "black";
+          h_ctx.beginPath();
+          h_ctx.arc(center.x, center.y, 4, 2 * Math.PI, false);
+          h_ctx.fill()
         }
       }
 
 
-      if (nextBody.render.type === "ground") {
+
+
+      if(nextBody.render.type ==="detector"){
+        //dont render
+      }else if (nextBody.render.type === "ground") {
         let id = nextBody.render.id;
 
         if (gs[id] === undefined) {
@@ -364,25 +472,54 @@
 
         rc.draw(gs[id]);
 
+      } else if(nextBody.render.type === "hole") {
+        let id = nextBody.render.id;
 
+        if (gs[id] === undefined) {
+          let g = generator.polygon(holeVertices.map(el => [el.x, el.y]), {
+            stroke: nextBody.render.stroke, strokeWidth: 3,
+            fill: nextBody.render.fill,
+            fillStyle: nextBody.render.fillStyle,
+            seed: between(1, 99999)
+          });
 
-      } else {
+          gs[id] = g;
+        }
+
+        rc.draw(gs[id]);
+
+        // draw flag
+
+        let slope = (holeVertices[5].y-holeVertices[4].y) / (holeVertices[5].x - holeVertices[4].x)
+        let flagPos = [ holeVertices[4].x + 5, holeVertices[4].y + 5 * slope ];
+        rc.line(flagPos[0], flagPos[1], flagPos[0], flagPos[1] - 200, { strokeWidth: 3 })
+
+        rc.polygon(
+          [
+          [flagPos[0], flagPos[1] - 200], 
+          [flagPos[0] + 80, flagPos[1] - 170], 
+          [flagPos[0], flagPos[1] - 140]
+      ],{strokeWidth: 3,fill: 'rgba(255,0,0,0.7)', fillStyle: "solid", }
+          )
+        // }
+      }else{
         ctx.fillStyle = 'black';
         ctx.strokeStyle = 'black'
         ctx.lineWidth = 3;
+
+        ctx.beginPath();
         ctx.moveTo(vertices[0].x, vertices[0].y);
         for (let j = 1; j < vertices.length; j += 1) {
           ctx.lineTo(vertices[j].x, vertices[j].y);
         }
         ctx.lineTo(vertices[0].x, vertices[0].y);
+        ctx.closePath();
         ctx.fill();
         ctx.stroke();
       }
-
-
-
-
     }
+
+
     if(ball.position.y > height || ball.position.x < 0 || ball.position.x > width){
       reset();
     }
@@ -390,12 +527,58 @@
     ctx.fillStyle = "black";
     ctx.font = '52px Gloria Hallelujah'
     ctx.fillText(
-      `bombs: ${bombCount} strokes: ${strokes}`,
+      `available hits: ${bombCount} total strokes: ${strokes} attempts: ${attempts}`,
       100,100
     )
 
+
+    // aim line
+    if(clickPos.x !== null && mousePos.x !== null){
+    let dist = Math.sqrt((clickPos.x - mousePos.x) ** 2 + (clickPos.y - mousePos.y) ** 2);
+    let max = 400
+
+    if (dist > max) {
+      dist = max;
+    }
+
+    dist = (dist) / max
+
+    let angle = -Math.atan2(clickPos.y - mousePos.y, clickPos.x - mousePos.x)
+    let x = Math.cos(angle);
+    let y = Math.sin(angle);
+    x = x * 500.0 * dist
+    y = y * 500.0 * dist
+
+    ctx.beginPath();
+    ctx.strokeStyle = "red"
+    if(bombCount < 1){
+      ctx.strokeStyle = "grey"
+    }
+    ctx.lineWidth = 5;
+    ctx.moveTo(ball.position.x, ball.position.y);
+    ctx.lineTo(ball.position.x + x, ball.position.y - y);
+    ctx.stroke();
+    }
+
+    //debug
+    if(fps >= 50){
+      ctx.fillStyle = "green";
+    }else if(fps >= 40){
+      ctx.fillStyle = "yellow"
+    }else{
+      ctx.fillStyle = "red"
+    }
+
+     ctx.fillText(
+      `fps: ${Math.floor(fps)}`,
+      100, 200
+    )
+
+
     window.requestAnimationFrame(render);
   }
+
+
   window.requestAnimationFrame(render);
 
   let bombCount = 2;
@@ -407,22 +590,48 @@
 
     for(let i = 0; i < pairs.length; i++){
       if(bombCount < 2 && ball.velocity.x ** 2 < 0.001 && ball.velocity.y ** 2 < 0.001 && (pairs[i].bodyA.render?.type === 'ball' ||  pairs[i].bodyB.render?.type === 'ball')){
-
         bombCount = 2;
-        console.log('bombs refilled')
       }
+
+      if ((pairs[i].bodyA.render?.type === 'detector' || pairs[i].bodyB.render?.type === 'detector') && (pairs[i].bodyA.render?.type === 'ball' || pairs[i].bodyB.render?.type === 'ball')) {
+        if(ball.velocity.x ** 2 < 0.001 && ball.velocity.y ** 2 < 0.001 && playing){
+          alert("you win!");
+
+          playing = false;
+
+          Runner.stop(runner);
+        }
+      }
+
     }
   })
 
-  document.addEventListener("click", (e) => {
+  let clickPos = {x: null, y: null}
+  let mousePos = {x: null, y: null}
 
+  document.addEventListener("mousedown", (e) => {
+      clickPos = getMousePos(canvas, e);
+    // console.log("mouseDown", clickPos)
+  });
+
+  document.addEventListener("mousemove",e=>{
+    if(clickPos.x !== null){
+      mousePos = getMousePos(canvas, e);
+    }
+  })
+
+  document.addEventListener("mouseup", (e) => {
+    
     let mousePos = getMousePos(canvas, e);
     let ballPos = ball.position;
 
-    let dist = Math.sqrt((ballPos.x - mousePos.x) ** 2 + (ballPos.y - mousePos.y) ** 2);
 
 
-    let max = 200
+
+    let dist = Math.sqrt((clickPos.x - mousePos.x) ** 2 + (clickPos.y - mousePos.y) ** 2);
+
+
+    let max = 400
 
     if (dist > max) {
       dist = max;
@@ -432,9 +641,9 @@
       dist = 25;
     }
 
-    dist = (max - dist) / max
+    dist = (dist) / max
 
-    let angle = -Math.atan2(ballPos.y - mousePos.y, ballPos.x - mousePos.x)
+    let angle = -Math.atan2(clickPos.y - mousePos.y, clickPos.x - mousePos.x)
 
 
     let x = Math.cos(angle);
@@ -450,6 +659,7 @@
     bombCount -= 1;
     }
 
+    clickPos = {x: null,y: null}
     // scribbles.push(scribblePoints((ballPos.x - mousePos.x) / 2 + mousePos.x,(ballPos.y-mousePos.y) / 2 + mousePos.y, 140 * dist + 80, 80 * dist + 40))
 
   })
