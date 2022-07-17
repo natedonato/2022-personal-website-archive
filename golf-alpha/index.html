@@ -532,8 +532,8 @@
     )
 
 
-    // aim line
-    if(clickPos.x !== null && mousePos.x !== null){
+    // aim line arrow
+    if(clickPos.x !== null && mousePos.x !== null && playing){
     let dist = Math.sqrt((clickPos.x - mousePos.x) ** 2 + (clickPos.y - mousePos.y) ** 2);
     let max = 400
 
@@ -548,17 +548,31 @@
     let y = Math.sin(angle);
     x = x * 500.0 * dist
     y = y * 500.0 * dist
+    let arrowL = 50
+    let p2x = arrowL * Math.cos(angle + 4*Math.PI/5)
+    let p2y = arrowL * Math.sin(angle + 4*Math.PI/5)
+    let p3x = arrowL * Math.cos(angle + 6*Math.PI/5)
+    let p3y = arrowL * Math.sin(angle + 6*Math.PI/5)
+    console.log(p2x, p2y)
 
     ctx.beginPath();
     ctx.strokeStyle = "red"
     if(bombCount < 1){
       ctx.strokeStyle = "grey"
     }
-    ctx.lineWidth = 5;
-    ctx.moveTo(ball.position.x, ball.position.y);
-    ctx.lineTo(ball.position.x + x, ball.position.y - y);
-    ctx.stroke();
+    // rc.line(clickPos.x, clickPos.y, clickPos.x + x, clickPos.y - y,{stroke: ctx.strokeStyle, strokeWidth: 5, roughness: 1})
+    // rc.line(clickPos.x + x + p2x, clickPos.y - y - p2y, clickPos.x + x, clickPos.y - y,{stroke: ctx.strokeStyle, strokeWidth: 5, roughness: 1})
+    // rc.line(clickPos.x + x + p3x, clickPos.y - y - p3y, clickPos.x + x, clickPos.y - y,{stroke: ctx.strokeStyle, strokeWidth: 5, roughness: 1})
+
+    rc.line(ball.position.x, ball.position.y, ball.position.x + x, ball.position.y - y,{stroke: ctx.strokeStyle, strokeWidth: 5, roughness: 1})
+    rc.line(ball.position.x + x + p2x, ball.position.y - y - p2y, ball.position.x + x, ball.position.y - y,{stroke: ctx.strokeStyle, strokeWidth: 5, roughness: 1})
+    rc.line(ball.position.x + x + p3x, ball.position.y - y - p3y, ball.position.x + x, ball.position.y - y,{stroke: ctx.strokeStyle, strokeWidth: 5, roughness: 1})
+
+
+
     }
+
+
 
     //debug
     if(fps >= 50){
@@ -667,7 +681,7 @@
     x = x * 14 * 0.01 * dist
     y = y * 14 * 0.01 * dist
 
-    if(bombCount > 0){
+    if(bombCount > 0 && playing){
 
     Body.applyForce(ball, ball.position, { x: x, y: -y })
     strokes += 1;
@@ -705,8 +719,8 @@
     let rect = canvas.getBoundingClientRect();
     
     return {
-      x: (evt.clientX || evt.targetTouches[0].pageX - rect.left) / (rect.right - rect.left) * canvas.width,
-      y: (evt.clientY || evt.targetTouches[0].pageY - rect.top) / (rect.bottom - rect.top) * canvas.height
+      x: ((evt.clientX || evt.targetTouches[0].pageX) - rect.left) / (rect.right - rect.left) * canvas.width,
+      y: ((evt.clientY || evt.targetTouches[0].pageY) - rect.top) / (rect.bottom - rect.top) * canvas.height
     };
   }
 
