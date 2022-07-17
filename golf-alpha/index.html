@@ -656,7 +656,9 @@
 
   function mouseUp(e){
     console.log('mouseup')
-
+    if(mousePos.x === null){
+      return;
+    }
     // let mousePos = getMousePos(canvas, e);
     let ballPos = ball.position;
     let dist = Math.sqrt((clickPos.x - mousePos.x) ** 2 + (clickPos.y - mousePos.y) ** 2);
