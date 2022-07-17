@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Matter.js proj</title>
+  <title>NateGolf</title>
       <link href="https://fonts.googleapis.com/css?family=Gloria+Hallelujah&display=block" rel="stylesheet" />
   <script src="./matter.js"></script>
   <script src="./rough.js"></script>
@@ -219,7 +219,7 @@
   let overlap = true;
   let Cx = platforms[0].position.x
   let Cy = platforms[0].position.y - 10;
-  let rad = 10;
+  let rad = 20;
 
 
   // replace this with a better function that generates a start and finish, and deletes any platforms in their "airspace"
@@ -242,6 +242,8 @@
       fillStyle: "blue"
     }
   })
+
+  Body.setMass(ball, 1.17559968)
 
 
   platforms = platforms.sort((a, b) => dist(a, ball) - dist(b, ball))
@@ -655,10 +657,10 @@
   )
 
   function mouseUp(e){
-    console.log('mouseup')
     if(mousePos.x === null){
       return;
     }
+
     // let mousePos = getMousePos(canvas, e);
     let ballPos = ball.position;
     let dist = Math.sqrt((clickPos.x - mousePos.x) ** 2 + (clickPos.y - mousePos.y) ** 2);
