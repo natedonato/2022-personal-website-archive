@@ -1,24 +1,28 @@
 
 mvp:
+-fix level generation logic 
+  (simplify?  
+      start zone on left, top-left, or bottom-left
+      end zone on the right, top right, or bottom right)
+      platforms in the general middle / unused side areas
 
--add collision detection and delete platforms above start and end
+-add victory screen! used strokes, export saved image, go to next/previous?
 
--add alternate controls
+-add basic instructions / menu
 
--add simplest win condition logic
+add more platform types:
+  see-saw?
+  ice
+  rough
+  spring?
+  rope?
+  stack of boxes / physics object?
 
--add flag at end
--add hole and hole physics logic
--add save screenshot logic
+  special: hearts?  polyogn shapes?
 
--optimize canvas
-  -separate bg (or offscreen) canvas for no redrawing old dots hella?
-  -reduce res and pixel ratio for mobile?
-
-add basic instructions / menu
-
-<!-- add link to 'yesterdays' course -->
-
-add stats page via cookies
-
-add more platform types, level variations, visual variations?
+  
+bonus:
+-add some visual variations? clouds or details?
+-add running stats?
+-add a full course (9-18 holes that track stats across)
+-multiplayer rooms?  big stretch...
