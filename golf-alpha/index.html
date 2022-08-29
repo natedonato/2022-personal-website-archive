@@ -711,6 +711,8 @@
     window.requestAnimationFrame(render);
   }
 
+      document.body.appendChild(document.createElement('br'))
+
 
   window.requestAnimationFrame(render);
 
@@ -745,7 +747,6 @@
 
     let scoreDiv = document.createElement('div')
     document.body.appendChild(document.createElement('br'))
-    document.body.appendChild(document.createElement('br'))
     scoreDiv.innerText = `Hole ${currentHole} score: ${strokes}`
     document.body.appendChild(scoreDiv);
 
@@ -772,7 +773,6 @@
       }
       totalStrokes += strokes
 
-      document.body.appendChild(document.createElement('br'))
       document.body.appendChild(document.createElement('br'))
 
       let finalScoreDiv = document.createElement('div')
