@@ -537,23 +537,23 @@
 
       if(nextBody.render.type ==="detector"){
         //dont render
-        let id = nextBody.render.id;
+        // let id = nextBody.render.id;
 
-        if (gs[id] === undefined) {
-            let g = generator.polygon(vertices.map(el => [el.x, el.y]), {
-            stroke: "black", 
-            strokeWidth: 3,
-            fillWeight: 4,
-            // fill: nextBody.render.fill,
-            fill: "#13331b",
-            fillStyle: nextBody.render.fillStyle,
-            seed: between(1, 99999)
-          });
+        // if (gs[id] === undefined) {
+        //     let g = generator.polygon(vertices.map(el => [el.x, el.y]), {
+        //     stroke: "black", 
+        //     strokeWidth: 3,
+        //     fillWeight: 4,
+        //     // fill: nextBody.render.fill,
+        //     fill: "#13331b",
+        //     fillStyle: nextBody.render.fillStyle,
+        //     seed: between(1, 99999)
+        //   });
 
-          gs[id] = g;
-        }
+        //   gs[id] = g;
+        // }
 
-        rc.draw(gs[id]);
+        // rc.draw(gs[id]);
 
       }else if (nextBody.render.type === "ground") {
         let id = nextBody.render.id;
