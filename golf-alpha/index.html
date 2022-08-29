@@ -523,12 +523,22 @@
           points.push(center);
         }
         let dist = Math.sqrt((center.x - points[points.length - 1].x) ** 2 + (center.y - points[points.length - 1].y) ** 2);
-        if (dist > 9) {
-          points.push(center);
+        
+        let unitV = [center.x - points[points.length - 1].x, center.y - points[points.length - 1].y].map(el => el / dist)
+        
+        while (dist >= 15) {
+
+          let nextPoint = {}
+          nextPoint.x = unitV[0] * 15 + points[points.length - 1].x
+          nextPoint.y = unitV[1] * 15 + points[points.length - 1].y
+          points.push(nextPoint);
+          dist = Math.sqrt((center.x - points[points.length - 1].x) ** 2 + (center.y - points[points.length - 1].y) ** 2);
           h_ctx.fillStyle = "black";
           h_ctx.beginPath();
-          h_ctx.arc(center.x, center.y, 4, 2 * Math.PI, false);
+          h_ctx.arc(nextPoint.x, nextPoint.y, 4, 2 * Math.PI, false);
           h_ctx.fill()
+          // dist = Math.sqrt((center.x - points[points.length - 1].x) ** 2 + (center.y - points[points.length - 1].y) ** 2);
+          
         }
       }
 
@@ -637,7 +647,7 @@
     ctx.fillStyle = "black";
     ctx.font = '52px Gloria Hallelujah'
     ctx.fillText(
-      `available hits: ${bombCount} total strokes: ${strokes} attempts: ${attempts}`,
+      `Hole ${currentHole} / 9. Current strokes: ${strokes}. Hole deaths: ${attempts - 1}`,
       100,100
     )
 
