@@ -161,17 +161,13 @@
 
     let holeVertices = corners;
     
-    console.log(corners);
-
     let myHole = Bodies.fromVertices(0,0, holeVertices,{ isStatic: true, render:{type: "hole", id:"hole"}})
     let myHoleCenter = Vertices.centre(myHole.vertices);
-    console.log(myHoleCenter);
-
+    
 
     let detector = Bodies.fromVertices(0, 0, [holeVertices[1], holeVertices[2], holeVertices[3], holeVertices[4]], { isStatic: true, isSensor: true, render: { type: 'detector', id: 'detector', fill: 'black', stroke: "black" }  })
     let detectorCentre = Vertices.centre(detector.vertices)
-    console.log(detectorCentre)
-
+    
     return [myHole, detector,holeVertices];
   }
 
@@ -233,8 +229,6 @@
     
 
     if(overX && overY  ){
-      console.log('overlap')
-      console.log(A,B)
       return true
     }else{
       return false
@@ -334,7 +328,6 @@
 
       searching = false;
 
-      console.log(platforms.length);
       if(platforms.length < 2){platforms.push(randomGround());}
 
       for(let i = 1; i < platforms.length; i++ ){
@@ -362,7 +355,6 @@
       platforms = platforms.filter(el => el !== null);
     }
 
-    console.log(platforms.length)
   }
 
 
@@ -390,28 +382,26 @@
     Body.setMass(ball, 1.17559968)
 
 
-    // platforms = platforms.sort((a, b) => dist(a, ball) - dist(b, ball))
     platforms[0].render.fill = "orange";
 
 
+
+    // move Hole and detector into position
     [myHole, detector, holeVertices] = hole();
 
 
     Body.setPosition(myHole, platforms[platforms.length - 1].position);
 
-
-    let min = [...holeVertices].sort((a, b) => a.x - b.x)[0]
+    let corners = [...holeVertices];
+    corners.splice(1,3);
+    let min = [...corners].sort((a, b) => a.x - b.x)[0]
     let min2 = [...myHole.vertices].sort((a, b) => a.x - b.x)[0]
-
-
-    let offsetY = min.y - min2.y
     let offsetX = min.x - min2.x
+    min = [...corners].sort((a, b) => a.y - b.y)[0]
+    min2 = [...myHole.vertices].sort((a, b) => a.y - b.y)[0]
+    let offsetY = min.y - min2.y
 
     holeVertices = holeVertices.map(el => ({ x: el.x - offsetX, y: el.y - offsetY }));
-
-    let offsetY2 = holeVertices[1].y - myHole.position.y
-    let offsetX2 = holeVertices[1].x - myHole.position.x
-
 
     let centre = Vertices.centre([holeVertices[1], holeVertices[2], holeVertices[3], holeVertices[4]]);
 
@@ -421,9 +411,9 @@
     });
 
     platforms.pop();
-
-
+    
     myHole.render.fill = "green";
+
 
     Composite.clear(engine.world);
 
