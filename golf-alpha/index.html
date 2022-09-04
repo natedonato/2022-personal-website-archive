@@ -304,8 +304,6 @@
     let myHole = Bodies.fromVertices(0,0, holeVertices,{ isStatic: true, render:{type: "hole", id:"hole"}})
     myHole.restitution = 0.3;
     myHole.friction = 0.001;
-
-    let myHoleCenter = Vertices.centre(myHole.vertices);
     
 
     let detector = Bodies.fromVertices(0, 0, [holeVertices[1], holeVertices[2], holeVertices[3], holeVertices[4]], { isStatic: true, isSensor: true, render: { type: 'detector', id: 'detector', fill: 'black', stroke: "black" }  })
@@ -549,22 +547,33 @@
     platforms[0].render.fill = "red";
     Body.scale(platforms[0],1.2,1);
 
-
-
     // move Hole and detector into position
     [myHole, detector, holeVertices] = hole();
 
-
     Body.setPosition(myHole, platforms[platforms.length - 1].position);
 
-    let corners = [...holeVertices];
-    corners.splice(1,3);
-    let min = [...corners].sort((a, b) => a.x - b.x)[0]
-    let min2 = [...myHole.vertices].sort((a, b) => a.x - b.x)[0]
-    let offsetX = min.x - min2.x
-    min = [...corners].sort((a, b) => a.y - b.y)[0]
-    min2 = [...myHole.vertices].sort((a, b) => a.y - b.y)[0]
-    let offsetY = min.y - min2.y
+
+    //get hole vertices
+    let allVertices = [];
+    myHole.parts.forEach(p => allVertices.push(...p.vertices));
+    let seen = [];
+    let vertices = [];
+
+    allVertices.forEach(p => {
+      if(seen[p.x+"%"+p.y] === undefined){
+        vertices.push(p)
+        seen[p.x + "%" + p.y] = true;
+      }
+    })
+
+    let min = vertices.sort((a,b) => a.x - b.x )[0].x
+    let min2 = [...holeVertices].sort((a,b) => a.x - b.x )[0].x
+    
+    let offsetX = min2 - min;
+    min = vertices.sort((a,b) => a.y - b.y )[0].y
+    min2 = [...holeVertices].sort((a,b) => a.y - b.y )[0].y
+
+    let offsetY = min2 - min;
 
     holeVertices = holeVertices.map(el => ({ x: el.x - offsetX, y: el.y - offsetY }));
 
