@@ -12,13 +12,133 @@
   <script src="./decomp.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js">
 </script>
+
+<style>
+  *{
+    box-sizing: border-box;
+  }
+  body,
+  html {
+    /* overflow: hidden; */
+    height: 100%;
+    /* margin: 5px; */
+    margin-bottom: 100px;
+  }
+
+  .canvas-container {
+    position: relative;
+    display: block;
+    margin: 2vh auto;
+    max-width: min(100%, 90vmin, 800px);
+    max-height: min(100%, 90vmin, 800px);
+    width: auto;
+    height: auto;
+  }
+
+  #canvas-overlay {
+    /* display: none; */
+    position: absolute;
+
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  #tutorial{
+    display: none;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 1);
+    padding: 5%;
+    border: 1px solid #cccccc;
+    line-height: 2.5vmin;
+  }
+
+  #back{
+    cursor: pointer;
+  }
+  #back:hover{
+    opacity: 0.8
+  }
+
+  #splash {
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 5%;
+
+  }
+
+  .vid{
+    width: 70%;
+    height: auto;
+    border: 1px dashed blue
+  }
+
+  .menubutton:hover {
+    cursor: pointer;
+    fill: green;
+  }
+
+  canvas {
+    /* display: block;
+    margin: 2vh auto;
+    max-width: min(100%, 90vw, 800px);
+    max-height: min(100%, 90vmin); */
+    width: 100%;
+    height: auto;
+    /* border: 1px solid black; */
+  }
+</style>
+
 </head>
 
 <body>
 
   <div class="canvas-container">
-    <div class="canvas-overlay">
+    <div id="canvas-overlay">
 
+      <div id="splash">
+        <svg viewBox="0 0 106 18">
+          <text x="0" y="15">NateGolf</text>
+        </svg>
+        <svg viewBox="0 0 400 70">
+          <text fill="#555555" x="0" y="15">Version 0.35 alpha</text>
+        </svg>
+        <svg viewBox="0 0 400 30">
+          <text id="playbtn" class="menubutton" x="0" y="15">• Play today's course!</text>
+        </svg>
+        <svg viewBox="0 0 420 30">
+          <text id="howtobtn" class="menubutton" x="0" y="15">• How to play</text>
+        </svg>
+      </div>
+
+      <div id="tutorial">
+
+        <video class="vid" autoplay loop muted playsinline src="./howto.mov" onclick="this.play()"></video>
+        <br />
+        <br />
+        <br />
+        <br />
+        <svg viewBox="0 0 420 30">
+          <text x="0" y="15">1. Click and drag to aim</text>
+        </svg>
+        <svg viewBox="0 0 420 30">
+          <text x="0" y="15">2. Release to hit</text>
+        </svg>
+        <svg viewBox="0 0 420 30">
+          <text x="0" y="15">3. Aim for the hole!</text>
+        </svg>
+          <br />
+          <br />
+        <svg viewBox="0 0 420 30">
+          <text id="back" fill="green" x="0" y="15">&lt;== Back to menu</text>
+        </svg>
+
+     
+      </div>
 
 
 
@@ -35,7 +155,23 @@
 
 // NateGolf, an experimental browser game.  We'll see how it goes...
 
+  let overlay = document.getElementById('canvas-overlay')
+  // ui logic
+  document.getElementById('playbtn').onclick = () => {
+    playing = true;
+    overlay.style.display = "none";
+  }
 
+  document.getElementById('back').onclick = () => {
+    document.getElementById("splash").style.display = "block";
+    document.getElementById("tutorial").style.display = "none";
+  }
+  
+
+  document.getElementById('howtobtn').onclick = () => {
+    document.getElementById("splash").style.display = "none";
+    document.getElementById("tutorial").style.display = "block";
+  }
 
 
 // begin seed logic
@@ -95,13 +231,7 @@
 
   // end Engine setup
 
-
-
-
-
-
-
-  let playing = true;
+  let playing = false;
 
 
 
@@ -489,7 +619,7 @@
       render: {
         id: "wall",
         fill: null,
-        stroke: "red",
+        stroke: null,
         fillStyle: "none",
         type: "ground"
       }
@@ -501,7 +631,19 @@
       render: {
         id: "wall",
         fill: null,
-        stroke: "red",
+        stroke: null,
+        fillStyle: "none",
+        type: "ground"
+      }
+    });
+    let wallTop = Bodies.rectangle(width / 2, -40, width, 80, {
+      isStatic: true,
+      restitution: 0.7,
+      friction: 0,
+      render: {
+        id: "wall",
+        fill: null,
+        stroke: null,
         fillStyle: "none",
         type: "ground"
       }
@@ -511,6 +653,8 @@
     wallLeft.friction = 0;  
     wallRight.restitution = 0.5;
     wallRight.friction = 0;
+    wallTop.restitution = 0.5;
+    wallTop.friction = 0;
     
      Composite.add(engine.world, [
       ...platforms,
@@ -518,7 +662,8 @@
       myHole,
       detector,
       wallLeft,
-      wallRight
+      wallRight,
+      wallTop,
     ]);
 
     gs = {};
@@ -601,8 +746,8 @@
   function redrawBg(death){
     h_ctx.clearRect(0,0,width,height);
     h_rc.draw(lines)
-
     drawSpikes();
+
 
 
     // plot past points
@@ -982,11 +1127,11 @@
   canvas.addEventListener("mousedown", (e) => {
     e.preventDefault();
     clickPos = getMousePos(canvas, e);
-
-
     // console.log("mouseDown", clickPos)
+
+    canvas.style.cursor = "pointer";
   });
-  
+
   canvas.addEventListener("touchstart", (e) => {
       e.preventDefault();
       clickPos = getMousePos(canvas, e);
@@ -1014,6 +1159,7 @@
   )
 
   function mouseUp(e){
+    canvas.style.cursor = "default"
     if(mousePos.x === null){
       return;
     }
@@ -1087,43 +1233,6 @@
   }
 
 </script>
-<style>
-  body,
-  html {
-    /* overflow: hidden; */
-    height: 100%;
-    /* margin: 5px; */
-    margin-bottom: 100px;
-  }
 
-  .canvas-container{
-    position: relative;
-    display: block;
-    margin: 2vh auto;
-    max-width: min(100%, 90vmin, 800px);
-    max-height: min(100%, 90vmin, 800px);
-    width: auto;
-    height: auto;
-  }
-
-  .canvas-overlay{
-    display: none;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-  }
-
-  canvas {
-    /* display: block;
-    margin: 2vh auto;
-    max-width: min(100%, 90vw, 800px);
-    max-height: min(100%, 90vmin); */
-    width: 100%;
-    height: auto;
-    /* border: 1px solid black; */
-  }
-</style>
 
 </html>
