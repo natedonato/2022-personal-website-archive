@@ -120,16 +120,19 @@
       let x = between(w / 2 + 100, width - w / 2 - 100)
       nid += 1;
 
-      return Bodies.rectangle(x, y, w, h, {
+      let plat = Bodies.rectangle(x, y, w, h, {
         isStatic: true,
         render: {
           id: nid,
           fill: null,
-          stroke: 'red',
+          stroke: 'black',
           fillStyle: 'none',
           type: "ground"
         }
       });
+      plat.restitution = 0.4,
+      plat.friction = 0.01;
+      return plat;
     }
 
 
@@ -162,6 +165,9 @@
     let holeVertices = corners;
     
     let myHole = Bodies.fromVertices(0,0, holeVertices,{ isStatic: true, render:{type: "hole", id:"hole"}})
+    myHole.restitution = 0.3;
+    myHole.friction = 0.001;
+
     let myHoleCenter = Vertices.centre(myHole.vertices);
     
 
@@ -371,7 +377,8 @@
 
 
     ball = Bodies.circle(Cx, Cy, rad, {
-      restitution: 0.3,
+      restitution: 0,
+      friction: 1,
       density: 0.004,
       render: {
         track: true,
@@ -379,10 +386,12 @@
       }
     })
 
-    Body.setMass(ball, 1.17559968)
+    Body.setInertia(ball, Infinity);
+
+    Body.setMass(ball, 1.17559968);
 
 
-    platforms[0].render.fill = "orange";
+    platforms[0].render.fill = "red";
 
 
 
@@ -413,6 +422,35 @@
     platforms.pop();
     
     myHole.render.fill = "green";
+    // myHole.render.stroke = "darkgreen";
+
+
+
+    for(let i = 1; i < platforms.length; i++){
+      let p = platforms[i]
+      
+      // ice
+      if(between(1,4) === 1){
+        p.render.stroke = 'aqua';
+        p.render.fill = 'aqua';
+        p.restitution = 0.75;
+        p.friction = 0.003;
+      }
+
+      //sand
+      if(between(1,4) === 1){
+        p.render.stroke = "orange"
+        p.render.fill = "#EDC9AF"
+        p.restitution = 0.1;
+        p.friction = 0.09; 
+      }
+
+
+
+    }
+
+
+
 
 
     Composite.clear(engine.world);
@@ -589,7 +627,8 @@
 
         if (gs[id] === undefined) {
           let g = generator.polygon(holeVertices.map(el => [el.x, el.y]), {
-            stroke: nextBody.render.stroke, strokeWidth: 3,
+            stroke: nextBody.render.stroke, 
+            strokeWidth: 3,
             fill: nextBody.render.fill,
             fillStyle: nextBody.render.fillStyle,
             seed: between(1, 99999)
@@ -611,7 +650,10 @@
           [flagPos[0], flagPos[1] - 200], 
           [flagPos[0] + 80, flagPos[1] - 170], 
           [flagPos[0], flagPos[1] - 140]
-      ],{strokeWidth: 3,fill: 'rgba(255,0,0,0.7)', fillStyle: "solid", }
+      ],{
+        strokeWidth: 3,
+        fill: playing ? 'rgba(255,0,0,0.7)' : 'green', 
+        fillStyle: "solid", }
           )
         // }
       }else{
@@ -731,9 +773,7 @@
     // add time since last frame to physics buffer
     physicsBuffer += frameTime;
 
-    let steps = 0;
     while (physicsBuffer >= physicsStep) {
-      steps += 1
       Engine.update(engine, physicsStep);
       physicsBuffer -= physicsStep;
       // t += physicsStep;
@@ -756,8 +796,9 @@
     // console.log(pairs)
 
     for(let i = 0; i < pairs.length; i++){
-      if(bombCount < 2 && ball.velocity.x ** 2 < 0.001 && ball.velocity.y ** 2 < 0.001 && (pairs[i].bodyA.render?.type === 'ball' ||  pairs[i].bodyB.render?.type === 'ball')){
+      if(bombCount < 2 && ball.velocity.x ** 2 < 0.0001 && ball.velocity.y ** 2 < 0.0001 && (pairs[i].bodyA.render?.type === 'ball' ||  pairs[i].bodyB.render?.type === 'ball')){
         bombCount = 2;
+        Matter.Sleeping.set(ball, true)
       }
 
       if ((pairs[i].bodyA.render?.type === 'detector' || pairs[i].bodyB.render?.type === 'detector') && (pairs[i].bodyA.render?.type === 'ball' || pairs[i].bodyB.render?.type === 'ball')) {
@@ -766,11 +807,15 @@
 
           if( detector.bounds.min.y <= ball.position.y )
           {
-            handleEnd();     
+            playing = false;
+            render();
+            setTimeout(handleEnd, 100)
+            // handleEnd();     
           }
 
         }
       }
+
 
     }
   })
@@ -781,8 +826,8 @@
     document.body.appendChild(document.createElement('br'))
     scoreDiv.innerText = `Hole ${currentHole} score: ${strokes}`
     document.body.appendChild(scoreDiv);
-
     playing = false;
+
 
     if(currentHole < 9){
       if(strokes === 1){
@@ -877,10 +922,11 @@
     let x = Math.cos(angle);
     let y = Math.sin(angle);
 
-    x = x * 14 * 0.01 * dist
-    y = y * 14 * 0.01 * dist
+    x = x * 16 * 0.01 * dist
+    y = y * 16 * 0.01 * dist
 
     if(bombCount > 0 && playing){
+    Matter.Sleeping.set(ball, false)
 
     Body.applyForce(ball, ball.position, { x: x, y: -y })
     strokes += 1;
