@@ -979,13 +979,16 @@
   clickPos = {x: null, y: null}
   mousePos = {x: null, y: null}
 
-  document.addEventListener("mousedown", (e) => {
-      clickPos = getMousePos(canvas, e);
+  canvas.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    clickPos = getMousePos(canvas, e);
+
+
     // console.log("mouseDown", clickPos)
   });
+  
   canvas.addEventListener("touchstart", (e) => {
-        e.preventDefault();
-
+      e.preventDefault();
       clickPos = getMousePos(canvas, e);
     // console.log("mouseDown", clickPos)
   }, { passive: false });
@@ -1104,12 +1107,12 @@
   }
 
   .canvas-overlay{
+    display: none;
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-
   }
 
   canvas {
