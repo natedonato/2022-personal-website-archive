@@ -72,7 +72,7 @@
   const Engine = Matter.Engine,
     Common = Matter.Common,
     Render = Matter.Render,
-    Runner = Matter.Runner,
+    // Runner = Matter.Runner,
     Bodies = Matter.Bodies,
     Body = Matter.Body,
     Composites = Matter.Composites,
@@ -371,7 +371,7 @@
 
 
     ball = Bodies.circle(Cx, Cy, rad, {
-      restitution: 0.4,
+      restitution: 0.3,
       density: 0.004,
       render: {
         track: true,
@@ -441,10 +441,10 @@
 
 
   // create runner
-  let runner = Runner.create({ isFixed: true });
+  // let runner = Runner.create({ isFixed: true });
 
   // run the engine
-  Runner.run(runner, engine);
+  // Runner.run(runner, engine);
 
 
   /** @type {HTMLCanvasElement} */
@@ -492,8 +492,10 @@
 
  
   let prevTime = new Date();
+
   let fps = 0;
   function render() {
+
     let currTime = new Date();
     fps = 1000 / (currTime - prevTime);
     prevTime = currTime;
@@ -708,13 +710,43 @@
     )
 
 
-    window.requestAnimationFrame(render);
   }
 
       document.body.appendChild(document.createElement('br'))
 
 
-  window.requestAnimationFrame(render);
+
+  let currentTime = performance.now();
+  let physicsBuffer = 0;
+  let physicsStep = 16;
+
+
+  function gameLoop(){ 
+
+    //get time in ms since last frame
+    let newTime = performance.now();
+    let frameTime = newTime - currentTime;
+    currentTime = newTime;
+
+    // add time since last frame to physics buffer
+    physicsBuffer += frameTime;
+
+    let steps = 0;
+    while (physicsBuffer >= physicsStep) {
+      steps += 1
+      Engine.update(engine, physicsStep);
+      physicsBuffer -= physicsStep;
+      // t += physicsStep;
+      // console.log(steps)
+    }
+
+    // Engine.update(engine, 1000 / 60);
+    render()
+
+    window.requestAnimationFrame(gameLoop);
+  }
+  window.requestAnimationFrame(gameLoop);
+
 
   let bombCount = 2;
 
