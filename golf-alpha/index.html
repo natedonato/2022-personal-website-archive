@@ -944,11 +944,17 @@
       ctx.fillStyle = "black";
       ctx.font = '52px Gloria Hallelujah'
       ctx.fillText(
-        `Hole ${currentHole} / 9. Current strokes: ${strokes}. Hole deaths: ${attempts - 1}`,
+        `Hole ${currentHole} / 9. Current strokes: ${strokes}`,
         100,100
         )
+        let lives = ""
+        
+        ctx.fillStyle = "red";
+        ctx.font = '82px Gloria Hallelujah'
+        ctx.fillText(`${"♡".repeat(attempts-1)}${"♥".repeat(5-attempts+1)}`,width - 500,120)
+        // ctx.strokeStyle = "black";
+        // ctx.strokeText(`${"♡".repeat(attempts-1)}${"♥".repeat(5-attempts+1)}`,width - 500,120)
 
-          //debug
       if (fps >= 50) {
         ctx.fillStyle = "green";
       } else if (fps >= 40) {
@@ -957,10 +963,10 @@
         ctx.fillStyle = "red"
       }
 
-      ctx.fillText(
-        `fps: ${Math.floor(fps)}`,
-        100, 200
-      )
+      // ctx.fillText(
+      //   `fps: ${Math.floor(fps)}`,
+      //   100, 200
+      // )
 
     }
       
