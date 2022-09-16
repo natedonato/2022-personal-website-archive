@@ -2,54 +2,43 @@
 mvp:
 
 -Menus:
-  -add settings button that opens / closes a menu
+  -add settings button /screen 
     -add a fullscreen button in settings
     -add an "abort" area when shooting to cancel
-  
-  -add a HP display 
-  -add a Intro menu
-    -add how to play screen
-    -add a course / dificulty selector
+
+
 
   -add a finished hole screen
+    -screenshot download
   -add a game over screen
+    -screenshot download
 
 
 
-
-
-- basic sound
-  -on collision
-  -mute button
+-sound
+  -bounce
+  -hole 
+  -death
+  -clap?
   
-
-
-
--add hole finished screen- used strokes, export saved images, go to next/previous?
--add course finished screen
-
--style scorecard, add par / birdie / eagle? 
-  -add stroke limit, death limit, or time limit?
-
--add basic instructions / menu
-  -3 course selections
+-juice
+  -screen shake
+  -bounce particles
 
   
-add more platform types:
+more platform types:
+  u-shaped
+  easy mode green
+
   see-saw?
-  ice
-  rough
+  rough?
   spring?
   rope?
   stack of boxes / physics object?
   special: hearts?  polyogn shapes?
 
   
-pizazz:
--copy "results" to clipboard
--update physics to handle multi-ticks / slow renders
+stretch:
 -add running local stats?
-
 -add some visual variations? clouds or details?
-
--multiplayer rooms?  big stretch...
+-multiplayer rooms?

@@ -89,7 +89,7 @@
     max-height: min(100%, 90vmin); */
     width: 100%;
     height: auto;
-    /* border: 1px solid black; */
+    border: 1px solid black;
   }
 </style>
 
@@ -147,7 +147,11 @@
   </div>
 
   <div id="date"></div>
-  <a id="yesterday">yesterday's game</a>
+  <br>
+  <div>Welcome to NateGolf! (work in progress)</div>
+  <br>
+  <div>A brand new course is generated daily. <br> Made with Matter.js, Rough.js, ❤️ + ☕.<br><br> By <a href="https://www.natedonato.com">Nate Donato</a>.</div>
+  <br><a id="yesterday">Play yesterday's course</a>
 
 </body>
 
@@ -628,7 +632,7 @@
       render: {
         id: "wall",
         fill: null,
-        stroke: null,
+        stroke: "transparent",
         fillStyle: "none",
         type: "ground"
       }
@@ -640,7 +644,7 @@
       render: {
         id: "wall",
         fill: null,
-        stroke: null,
+        stroke: "transparent",
         fillStyle: "none",
         type: "ground"
       }
@@ -653,7 +657,7 @@
         id: "wall",
         fill: null,
         stroke: null,
-        fillStyle: "none",
+        fillStyle: "transparent",
         type: "ground"
       }
     });
@@ -716,7 +720,7 @@
 
 
    // make pagelines
-    let lines = generator.rectangle(0, 0, canvas.width, canvas.height, { fill: "rgba(0, 0, 255, 0.29)", hachureAngle: 90, strokeWidth: 10, fillWeight: 5, hachureGap: 65, seed: between(0,10000), roughness: 0.8 })
+    let lines = generator.rectangle(0, 0, canvas.width, canvas.height, { stroke: 'transparent', fill: "rgba(0, 0, 255, 0.29)", hachureAngle: 90, strokeWidth: 10, fillWeight: 5, hachureGap: 65, seed: between(0,10000), roughness: 0.8 })
 
     //hidden canvas?
   const h_canvas = document.createElement('canvas');
@@ -724,6 +728,16 @@
   h_canvas.height = height;
   const h_ctx = h_canvas.getContext('2d');
   const h_rc = rough.canvas(h_canvas);
+
+  //screenshot canvas
+  const s_canvas = document.createElement('canvas');
+  s_canvas.width = canvas.width;
+  s_canvas.height = canvas.height;
+  const s_ctx = s_canvas.getContext('2d');
+
+  s_ctx.fillStyle = "white";
+  s_ctx.fillRect(0,0,canvas.width, canvas.height);
+
 
   function drawSpikes(){
     let w = width / 60;
@@ -939,8 +953,6 @@
 
     //text
     if(playing){
-
-      
       ctx.fillStyle = "black";
       ctx.font = '52px Gloria Hallelujah'
       ctx.fillText(
@@ -967,6 +979,8 @@
       //   `fps: ${Math.floor(fps)}`,
       //   100, 200
       // )
+    }else{
+      // end screen stuff?
 
     }
       
@@ -1023,7 +1037,7 @@
 
 
   function gameLoop(){ 
-
+    if(currentHole < 10) {
     //get time in ms since last frame
     let newTime = performance.now();
     let frameTime = newTime - currentTime;
@@ -1043,19 +1057,37 @@
     render()
 
     window.requestAnimationFrame(gameLoop);
+    }
   }
   window.requestAnimationFrame(gameLoop);
 
 
   let bombCount = 2;
+  
+
+  // collision particles
+  Events.on(engine, "collisionStart", (e) => {
+    let pairs = e.pairs;
+
+    for (i = 0; i < pairs.length; i++) {
+      pair = pairs[i];
+      if (!pair.isActive){continue};
+
+
+
+
+
+    }
+
+  })
+
 
   Events.on(engine, "collisionActive", (e) => {
-
     let pairs = e.pairs;
     // console.log(pairs)
 
     for(let i = 0; i < pairs.length; i++){
-      if(bombCount < 2 && ball.velocity.x ** 2 < 0.0001 && ball.velocity.y ** 2 < 0.0001 && (pairs[i].bodyA.render?.type === 'ball' ||  pairs[i].bodyB.render?.type === 'ball')){
+      if(bombCount < 2 && ball.velocity.x ** 2 < 0.001 && ball.velocity.y ** 2 < 0.0001 && (pairs[i].bodyA.render?.type === 'ball' ||  pairs[i].bodyB.render?.type === 'ball')){
         bombCount = 2;
         Matter.Sleeping.set(ball, true)
       }
@@ -1079,13 +1111,10 @@
     }
   })
 
-  function handleEnd(reason){
+  async function handleEnd(reason){
 
 
     // if not finished
-    if(currentHole < 9){
-
-
       if(reason === "death"){
         alert("💀 You died too many times 💀 - score of 12")
         strokes = 12;
@@ -1110,24 +1139,35 @@
     document.body.appendChild(scoreDiv);
     playing = false;
 
-    resetLevel();
-    redrawBg();
-    playing = true;
-
+    let url = canvas.toDataURL();
+    let img = new Image();
+    await new Promise(r => img.onload = r, img.src = url);
+    // let gutter =(s_canvas.width - (s_canvas.width / 4) * 3) / 4;
+    // s_ctx.drawImage(img,
+    // ((currentHole-1) % 3) * ((s_canvas.width / 4) + gutter) + gutter, 
+    // Math.floor((currentHole - 1) /3 ) * (s_canvas.height / 4 + gutter) + gutter,
+    // s_canvas.width/4,s_canvas.height/4);
+    s_ctx.drawImage(img,
+    ((currentHole-1) % 3) * ((s_canvas.width / 3)), 
+    Math.floor((currentHole - 1) /3 ) * (s_canvas.height / 3),
+    s_canvas.width/3,
+    s_canvas.height/3);
+    
+    if(currentHole < 9){
+      resetLevel();
+      redrawBg();
+      playing = true;
     }else{
-      if (strokes === 1) {
-        alert("⛳ YOU SCORED A PERFECT NATE!! ⛳")
-      } else {
-        alert(`You finished the hole in ${strokes} strokes!`);
-      }
-      totalStrokes += strokes
-
       document.body.appendChild(document.createElement('br'))
 
       let finalScoreDiv = document.createElement('div')
       finalScoreDiv.innerText = `Course total: ${totalStrokes} strokes`
       document.body.appendChild(finalScoreDiv);
 
+      
+      ctx.putImageData(s_ctx.getImageData(0,0,s_canvas.width, s_canvas.height),0,0)
+      currentHole += 2
+      
       alert(`you finished the entire course in ${totalStrokes} strokes, congrats!`);
     }
 
