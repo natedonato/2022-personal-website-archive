@@ -621,12 +621,14 @@ a:hover {
   will-change: transform;
   transform: translate(0, 110%);
 
-  animation: popmein 0.7s cubic-bezier(0.63, 0.31, 0.62, 1.23) forwards;
-  animation-delay: 1.2s;
+  /* animation: popmein 0.7s cubic-bezier(0.63, 0.31, 0.62, 1.23) forwards;
+  animation-delay: 1.2s; */
+  /* animation-play-state: paused !important; */
 }
 
-.hero-img-container .img-loading{
-  animation-play-state: paused !important;
+.hero-img-container.img-loaded{
+    animation: popmein 0.7s cubic-bezier(0.63, 0.31, 0.62, 1.23) forwards;
+  animation-delay: 1.2s;
 }
 
 .hero-img-container:hover #nate1{
@@ -846,12 +848,12 @@ a:hover {
   /* transform: translate(0, 600px); */
   will-change: transform;
   transform: translate(0, 110%);
-  animation: popmein 0.7s cubic-bezier(0.63, 0.31, 0.62, 1.23) forwards;
-  animation-delay: 1.2s;
+  /* animation: popmein 0.7s cubic-bezier(0.63, 0.31, 0.62, 1.23) forwards;
+  animation-delay: 1.2s; */
 }
-.hero-img-container .img-loading{
+/* .hero-img-container .img-loading{
   animation-play-state: paused !important;
-}
+} */
 .hero-img-container:hover #nate1{
   display: none;
 }
