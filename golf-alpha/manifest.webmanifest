@@ -1,0 +1,16 @@
+{
+  "name": "⛳ NateGolf Alpha",
+  "short_name": "NateGolf",
+  "description": "Welcome to NateGolf!  A brand new course is generated daily.  Made with Matter.js, Rough.js, ❤️ + ☕.",
+  "icons": [
+    {
+      "src": "/golf-alpha/icon.png",
+      "sizes": "369x369",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/golf-alpha/index.html",
+  "display": "fullscreen",
+  "theme_color": "#097969",
+  "background_color": "#e6e6e6"
+}

@@ -6,11 +6,12 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NateGolf</title>
-      <link href="https://fonts.googleapis.com/css?family=Gloria+Hallelujah&display=block" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Gloria+Hallelujah&display=block" rel="stylesheet" />
+  <link rel="manifest" href="./manifest.webmanifest" />
   <script src="./matter.js"></script>
   <script src="./rough.js"></script>
   <script src="./decomp.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js">
+  <script src="./seedrandom.min.js">
 </script>
 
 <style>
@@ -105,7 +106,7 @@
           <text x="0" y="15">NateGolf</text>
         </svg>
         <svg viewBox="0 0 400 70">
-          <text fill="#555555" x="0" y="15">Version 0.35 alpha</text>
+          <text fill="#555555" x="0" y="15">Version 0.36 alpha</text>
         </svg>
         <svg viewBox="0 0 400 30">
           <text id="playbtn" class="menubutton" x="0" y="15">• Play today's course!</text>
@@ -152,10 +153,50 @@
   <br>
   <div>A brand new course is generated daily. <br> Made with Matter.js, Rough.js, ❤️ + ☕.<br><br> By <a href="https://www.natedonato.com">Nate Donato</a>.</div>
   <br><a id="yesterday">Play yesterday's course</a>
+  <button class="add-button">Add NateGolf PWA to homescreen!</button>
 
 </body>
 
 <script>
+
+// register PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').then(() => { console.log('Service Worker Registered'); });;
+  }
+
+
+  // Add to homescreen button
+  let deferredPrompt;
+  const addBtn = document.querySelector('.add-button');
+  addBtn.style.display = 'none';
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent Chrome 67 and earlier from automatically showing the prompt
+    e.preventDefault();
+    // Stash the event so it can be triggered later.
+    deferredPrompt = e;
+    // Update UI to notify the user they can add to home screen
+    addBtn.style.display = 'block';
+
+    addBtn.addEventListener('click', () => {
+      // hide our user interface that shows our A2HS button
+      addBtn.style.display = 'none';
+      // Show the prompt
+      deferredPrompt.prompt();
+      // Wait for the user to respond to the prompt
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the A2HS prompt');
+        } else {
+          console.log('User dismissed the A2HS prompt');
+        }
+        deferredPrompt = null;
+      });
+    });
+  });
+
+
+
 
 // NateGolf, an experimental browser game.  We'll see how it goes...
 
