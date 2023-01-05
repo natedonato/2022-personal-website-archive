@@ -6,7 +6,8 @@
     {
       "src": "/golf-alpha/icon.png",
       "sizes": "369x369",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "start_url": "/golf-alpha/index.html",
