@@ -7,6 +7,12 @@
       "src": "/golf-alpha/icon.png",
       "sizes": "369x369",
       "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/golf-alpha/icon.png",
+      "sizes": "369x369",
+      "type": "image/png",
       "purpose": "maskable"
     }
   ],

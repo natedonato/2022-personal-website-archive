@@ -10,7 +10,7 @@ const contentToCache = [
   '/golf-alpha/seedrandom.min.js',
 ]
 
-const cacheName = "nategolf-v0.37a";
+const cacheName = "nategolf-v0.38a";
 
 // Installing Service Worker
 self.addEventListener("install", (e) => {
