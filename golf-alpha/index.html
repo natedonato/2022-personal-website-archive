@@ -30,6 +30,7 @@
     position: relative;
     display: block;
     margin: 2vh auto;
+    margin-top: calc(50vh - 45vmin);
     max-width: min(100%, 90vmin, 800px);
     max-height: min(100%, 90vmin, 800px);
     width: auto;
@@ -106,7 +107,7 @@
           <text x="0" y="15">NateGolf</text>
         </svg>
         <svg viewBox="0 0 400 70">
-          <text fill="#555555" x="0" y="15">Version 0.38 alpha</text>
+          <text fill="#555555" x="0" y="15">Version 0.39 alpha</text>
         </svg>
         <svg viewBox="0 0 400 30">
           <text id="playbtn" class="menubutton" x="0" y="15">• Play today's course!</text>
@@ -153,6 +154,7 @@
   <br>
   <div>A brand new course is generated daily. <br> Made with Matter.js, Rough.js, ❤️ + ☕.<br><br> By <a href="https://www.natedonato.com">Nate Donato</a>.</div>
   <br><a id="yesterday">Play yesterday's course</a>
+  <br>
   <button class="add-button">Add NateGolf PWA to homescreen!</button>
 
 </body>
@@ -238,6 +240,18 @@
   document.getElementById('yesterday').setAttribute("href", `?date=${parseInt(lastSeed.getTime() / 1000).toFixed(0)}`)
 
   let nateRand = () => rng.quick();
+
+  // gets value between X and Y at A%
+  const lerp = (x, y, a) => x * (1 - a) + y * a;
+
+  // clamps A to within bounds
+  const clamp = (a, min = 0, max = 1) => Math.min(max, Math.max(min, a));
+
+  // look up what percentage between X and Y value A is found at
+  const invlerp = (x, y, a) => clamp((a - x) / (y - x));
+
+  // given range x1y1, and second range x2y2, find where value A would lie if it was on the second range
+  const range = (x1, y1, x2, y2, a) => lerp(x2, y2, invlerp(x1, y1, a));
 
 
       // utility functions
@@ -1106,15 +1120,24 @@
   let bombCount = 2;
   
 
-  // collision particles
+  // collision sounds
   Events.on(engine, "collisionStart", (e) => {
     let pairs = e.pairs;
-
     for (i = 0; i < pairs.length; i++) {
       pair = pairs[i];
+      // console.log(pair)
+      if(pair.bodyA.render?.type === 'ball' || pair.bodyB.render?.type === 'ball'){
+        // console.log(pair.collision.depth);
+        let d = clamp(pair.collision.depth, 0,7);
+
+        d = range(0, 7, 0.5, 1, d);
+        console.log(d)
+
+        // if(pair.collision.depth > 1){
+        //   console.log('bounce2');
+        // }
+      }
       if (!pair.isActive){continue};
-
-
 
 
 
