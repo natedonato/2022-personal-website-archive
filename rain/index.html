@@ -245,7 +245,7 @@
       lightningFlash = timestamp;
       if(audioActive){
         document.getElementById('thunder').currentTime = 0;
-        document.getElementById('thunder').volume = 0.6;
+        document.getElementById('thunder').volume = 0.6 + Math.random()* 0.15;
         // document.getElementById('thunder').play();
 
         setTimeout( () => document.getElementById('thunder').play(), 600 + 800 * Math.random())
