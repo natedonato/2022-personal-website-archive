@@ -6,6 +6,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>rain</title>
+  <meta name="description" content="A rainy day web animation created in vanilla JavaScript and HTML5 Canvas by Nate Donato. Includes generative raindrops, lightning, and sound effects.">
+  <meta property="og:image" content="https://www.natedonato.com/rain/meta.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <audio id="rain" src="./rain.mp3" loop></audio>
   <audio id="thunder" src="./thunder.mp3"></audio>
   <audio id="shishi" src="./shishiodoshi.mp3" loop></audio>
@@ -113,7 +117,7 @@
     audioActive = true;
     document.getElementById('bodycontent').style.opacity = 1;
     document.getElementById('overlay').style.opacity = 0;
-    document.getElementById("shishi").volume = 0.22;
+    document.getElementById("shishi").volume = 0.15;
     document.getElementById("shishi").play()
     document.getElementById("rain").play()
     document.removeEventListener('click', handler);
