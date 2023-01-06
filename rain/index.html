@@ -109,15 +109,14 @@
 </body>
 <script>
   let audioActive = false;
-  window.addEventListener('click', function handler(event) {
+  document.addEventListener('click', function handler(event) {
     audioActive = true;
     document.getElementById('bodycontent').style.opacity = 1;
     document.getElementById('overlay').style.opacity = 0;
     document.getElementById("shishi").volume = 0.22;
     document.getElementById("shishi").play()
     document.getElementById("rain").play()
-
-    window.removeEventListener('click', handler);
+    document.removeEventListener('click', handler);
   });
 
 
