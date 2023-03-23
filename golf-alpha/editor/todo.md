@@ -1,12 +1,14 @@
 mvp:
 add hole detector
-add properties for color, restitution, friction
+move static renders to background layer
+add properties for restitution, friction
 add ball spawn location
 make level serializer / deserializer
   add multi hole course deserializer
 
 
 Stretch:
+add "layers"
 add background draw
 add death zones
 add spike drawing

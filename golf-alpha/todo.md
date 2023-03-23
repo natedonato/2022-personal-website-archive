@@ -2,17 +2,18 @@
 mvp:
 
 -Menus:
+  -add a better scorecard / end hole screen
+
   -add settings button /screen 
     -add a fullscreen button in settings
     -add an "abort" area when shooting to cancel
-
-
+    -reset ball to beginning button
 
   -add a finished hole screen
-    -screenshot download
+    -screenshot download, share to social media, gif?
   -add a game over screen
     -screenshot download
-
+  -add some prebuilt courses
 
 
 -sound
@@ -24,12 +25,12 @@ mvp:
 -juice
   -screen shake
   -bounce particles
+  -local stats, no retries
 
   
-more platform types:
+more random gen platform types:
   u-shaped
   easy mode green
-
   see-saw?
   rough?
   spring?
@@ -39,6 +40,5 @@ more platform types:
 
   
 stretch:
--add running local stats?
 -add some visual variations? clouds or details?
 -multiplayer rooms?

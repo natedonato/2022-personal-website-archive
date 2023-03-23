@@ -511,6 +511,20 @@
   let currentHole = 0;
   let sunk = false;
 
+  function loadLevel(JSON){
+    sunk = false;
+
+    spikeHeights = [];
+    currentHole += 1;
+    points = [];
+    pastPoints = [];
+    scribbles = [];
+    strokes = 0;
+
+    attempts = 1;
+    nid = 1;
+  }
+
   function resetLevel(){
     sunk = false;
 
@@ -927,7 +941,6 @@
           let g = generator.polygon(vertices.map(el => [el.x, el.y]), {
             stroke: nextBody.render.stroke, strokeWidth: 3,
             fill: nextBody.render.fill,
-            fillStyle: nextBody.render.fillStyle,
             seed: between(1, 99999)
           });
 
@@ -1158,9 +1171,7 @@
 
       if ((pairs[i].bodyA.render?.type === 'detector' || pairs[i].bodyB.render?.type === 'detector') && (pairs[i].bodyA.render?.type === 'ball' || pairs[i].bodyB.render?.type === 'ball')) {
         if(ball.velocity.x ** 2 < 0.001 && ball.velocity.y ** 2 < 0.001 && playing ){
-
-
-          if( detector.bounds.min.y <= ball.position.y )
+          if(detector.bounds.min.y <= ball.position.y )
           {
             playing = false;
             sunk = true;
@@ -1317,8 +1328,6 @@
 
     clickPos = {x: null,y: null}
     mousePos = {x: null,y: null}
-    // scribbles.push(scribblePoints((ballPos.x - mousePos.x) / 2 + mousePos.x,(ballPos.y-mousePos.y) / 2 + mousePos.y, 140 * dist + 80, 80 * dist + 40))
-
   }
 
   //explosion scribbles, depricated
