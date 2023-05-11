@@ -1,10 +1,11 @@
 mvp:
-add hole detector
-move static renders to background layer
+add border walls
 add properties for restitution, friction
-add ball spawn location
-make level serializer / deserializer
-  add multi hole course deserializer
+update serializer / deserializer to do multi hole course
+  update game engine to use serialier, reset, new object rendering
+fetch level from json (query string?)
+convert pencil to background draw
+
 
 
 Stretch:
@@ -12,13 +13,14 @@ add "layers"
 add background draw
 add death zones
 add spike drawing
-add edit/delete controls for existing objects
+add edit property controls for existing objects
 make interface better
-bugfix issue with duplicate points
 add touch control
+restrict chailkin
+add error messages
 
 Horion:
-add in editor level testing
 add auth and level database
 add some constraints (springs, rotators, motors?)
 add vertices select / edit
+bugfix issue with duplicate points

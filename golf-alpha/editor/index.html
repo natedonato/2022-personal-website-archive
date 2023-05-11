@@ -103,11 +103,12 @@
   <div class="canvas-container">
     <canvas id="canvas"></canvas>
   </div>
-    <button onclick="runTest()"> Start test </button>
-    <button onclick="endTest()"> End test </button>
-    <br>
+  <button onclick="runTest()"> Start test </button>
+  <button onclick="endTest()"> End test </button>
+  <br>
   Pointer mode: <select name="mode" id="mode">
-    <option value="draw">Freehand draw</option>
+    <option value="drawLine">Freehand line </option>
+    <option value="draw">Freehand shape</option>
     <option selected value="edge">Add shape vertex</option>
     <!-- <option value="pick">edit</option> -->
     <option value="flag">Add flag</option>
@@ -117,6 +118,8 @@
   <br>
   <button onclick="writeObject()"> Create pending object </button>
   <button onclick="writeDetector()"> Create hole/ball detector </button>
+  <button onclick="vertices = []"> Remove pending object </button>
+  <button onclick="removeLastObject()"> Delete last object </button>
   <br>
   Object is static? <input checked type="checkbox" id="static">
   <br>
@@ -141,13 +144,14 @@
   Show debug outlines? <input type="checkbox" id="debug" onclick="redrawBg()">
   <br>
   <br>
+  <button onclick="levelToJSON()">Save level to JSON</button>
+  <button onclick="recreateLevel()">Load level from JSON</button>
   <br>
-
+  <textarea name="leveldata" id="levelData" cols="30" rows="10"></textarea>
 </body>
 
 <script>
-  // begin seed logic
-
+  // seed / rng
   let seed = new Date();
   const urlParams = new URLSearchParams(window.location.search);
 
@@ -162,6 +166,8 @@
   let rng = new Math.seedrandom(seed.toLocaleDateString("en"));
   let nateRand = () => rng.quick();
 
+
+  // helper functions
   // gets value between X and Y at A%
   const lerp = (x, y, a) => x * (1 - a) + y * a;
 
@@ -174,24 +180,31 @@
   // given range x1y1, and second range x2y2, find where value A would lie if it was on the second range
   const range = (x1, y1, x2, y2, a) => lerp(x2, y2, invlerp(x1, y1, a));
 
-
-  // utility functions
+  // get random integer between min and max
   function between(min, max) {
     return Math.floor(nateRand() * (max + 1 - min) + min);
   }
 
+  // calculate distance between two matter bodies
   function dist(bod1, bod2) {
     return Math.sqrt((bod1.position.x - bod2.position.x) ** 2 + (bod1.position.y - bod2.position.y) ** 2);
   }
-  // end seed logic
+
+  // utility function to get mouse position
+  function getMousePos(canvas, evt) {
+    let rect = canvas.getBoundingClientRect();
+
+    return {
+      x: ((evt.clientX || evt.targetTouches[0].pageX) - rect.left) / (rect.right - rect.left) * canvas.width,
+      y: ((evt.clientY || evt.targetTouches[0].pageY) - rect.top) / (rect.bottom - rect.top) * canvas.height
+    };
+  }
+  // end helper functions
 
 
 
 
-
-
-
-  // begin Engine setup
+  // begin matter js basic engine setup
   const Engine = Matter.Engine,
     Common = Matter.Common,
     Render = Matter.Render,
@@ -206,101 +219,98 @@
     Vertices = Matter.Vertices,
     Events = Matter.Events;
   Common.setDecomp(decomp);
-
   const engine = Engine.create();
-
   // end Engine setup
 
-  // setup gameplay variables
+
+
+
+  // initialize some gameplay variables
   let playing = false;
   let attempts = 1;
   let bombCount = 2;
   let clickPos = { x: null, y: null }
   let mousePos = { x: null, y: null }
+  let hidespikes = true;
+  let spikeHeights = [];
+  let points = [];
+  let pastPoints = [];
+  let pastDeaths = [];
+  let scribbles = [];
+  let strokes = 0;
+  let totalStrokes = 0;
+  let currentHole = 0;
+  let sunk = false;
+  let Cx, Cy, ball;
+  // end gameplay variable initialization
 
 
 
 
-  // general level creation setup
 
+  // canvas creation setup
   // setting level dimensions
   let width = 2400;
   let height = 2400;
-
   width = 2200;
   height = 2200;
-
-
   const canvas = document.getElementById('canvas');
-
+  // set up rough stuff
   const rc = rough.canvas(canvas);
-
   let generator = rc.generator;
 
   /** @type {CanvasRenderingContext2D} */
-
   ctx = canvas.getContext('2d');
   canvas.width = width;
   canvas.height = height;
-
   ctx.lineWidth = 1;
   ctx.strokeStyle = '#ff0';
   ctx.fillStyle = '#000';
-
-
-
   // make pagelines
   let lines = generator.rectangle(0, 0, canvas.width, canvas.height, { stroke: 'transparent', fill: "rgba(0, 0, 255, 0.29)", hachureAngle: 90, strokeWidth: 10, fillWeight: 5, hachureGap: 65, seed: between(0, 10000), roughness: 0.8 })
-
-  //hidden canvas?
+  //background canvas setup
   const h_canvas = document.createElement('canvas');
   h_canvas.width = width;
   h_canvas.height = height;
   const h_ctx = h_canvas.getContext('2d');
   const h_rc = rough.canvas(h_canvas);
 
-  //screenshot canvas
+  //"screenshot" canvas
   const s_canvas = document.createElement('canvas');
   s_canvas.width = canvas.width;
   s_canvas.height = canvas.height;
   const s_ctx = s_canvas.getContext('2d');
-
   s_ctx.fillStyle = "white";
   s_ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+  // rough generator shape cache
   let gs = [];
+  // draw initial background
+  redrawBg();
+  // end canvas setup
 
 
+
+
+  // rendering utility functions
+  // draw spkes along bottom of page
   function drawSpikes() {
     let w = width / 60;
-
     h_ctx.fillStyle = "red"
-
     height = height + w;
     for (let i = 0; i * w < width; i++) {
-
       h_ctx.beginPath();
       h_ctx.moveTo(w * i, height);
       if (!spikeHeights[i]) {
         spikeHeights[i] = between(25, 30) / 10 * w
       }
-
       h_ctx.lineTo(w * i + w / 2, height - spikeHeights[i]);
       h_ctx.lineTo(w * i + w, height);
       h_ctx.fill()
-
-
-
     }
     height = height - w;
-
-
   }
-
-
-  let hidespikes = true;
-
-  function redrawBg(death) {
+  // redraw full background canvas scene
+  function redrawBg() {
     h_ctx.clearRect(0, 0, width, height);
     h_rc.draw(lines)
     if (!hidespikes) {
@@ -308,7 +318,6 @@
     }
 
     drawPlats(engine.world.bodies, true);
-
 
     // plot past points
     h_ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
@@ -322,6 +331,7 @@
 
   }
 
+  // draw custom objects
   function drawPlats(bodies, isStatic) {
     bodies.forEach(nextBody => {
       if (nextBody.isStatic !== isStatic) {
@@ -329,19 +339,22 @@
       };
       let t_ctx, t_rc;
 
-      if(isStatic === true){
+      // pick which canvas to write to (background or foreground) for static or non static objects
+      if (isStatic === true) {
         t_ctx = h_ctx;
         t_rc = h_rc;
-      }else{
+      } else {
         t_ctx = ctx;
         t_rc = rc;
       }
-
+      
+      // render shape
       if (nextBody.render.type === "shape") {
         let id = nextBody.render.id;
         let parts = nextBody.parts
         let outerVertices = []
 
+        // generate and cache rough sprite
         if (gs[id] === undefined) {
           let g = generator.polygon(nextBody.render.points.map(el => [el.x, el.y]), {
             stroke: nextBody.render.stroke, strokeWidth: 3,
@@ -352,10 +365,8 @@
           gs[id] = g
         }
 
+        // handle rotation and positioning of sprite
         let offset = [nextBody.position.x - nextBody.render.center.x, nextBody.position.y - nextBody.render.center.y]
-
-
-        // handle rotations
         t_ctx.save();
         t_ctx.translate(nextBody.position.x, nextBody.position.y);
         t_ctx.rotate(nextBody.angle);
@@ -364,18 +375,18 @@
         t_rc.draw(gs[id]);
         t_ctx.setTransform(1, 0, 0, 1, 0, 0);
       }
-        // debug
 
-        if (document.getElementById('debug').checked === true) {
-          let id = nextBody.render.id;
-          let parts = nextBody.parts
-          let outerVertices = []
-          if (nextBody.render.type === "shape" || nextBody.render.type === "detector"){
+      // debug rendering
+      if (document.getElementById('debug').checked === true) {
+        let id = nextBody.render.id;
+        let parts = nextBody.parts
+        let outerVertices = []
+        if (nextBody.render.type === "shape" || nextBody.render.type === "detector") {
           nextBody.parts.forEach((part, idx) => {
             let fill;
-            if(nextBody.render.type === "detector" ){
+            if (nextBody.render.type === "detector") {
               fill = 'rgba(255,0,0,0.2)'
-            }else{
+            } else {
               fill = idx === 0 && parts.length > 1 ? "rgba(0,0,255,0.1)" : "rgba(0,0,255,0.5)"
             }
             let g2 = generator.polygon(part.vertices.map(el => [el.x, el.y]), {
@@ -391,26 +402,16 @@
           t_ctx.fillRect(nextBody.position.x, nextBody.position.y, 20, 20)
           t_ctx.fillStyle = 'green'
           t_ctx.fillRect(nextBody.render.center.x, nextBody.render.center.y, 10, 10)
-          }
         }
-      
+      }
+
     })
   }
 
-  let spikeHeights = [];
-  let points = [];
-  let pastPoints = [];
-  let pastDeaths = [];
-  let scribbles = [];
-  let strokes = 0;
-  let totalStrokes = 0;
-  let currentHole = 0;
-  let sunk = false;
-  let Cx, Cy, ball;
-
-  redrawBg();
 
 
+
+  // main game loop live rendering function
   function render() {
     let currTime = new Date();
     fps = 1000 / (currTime - prevTime);
@@ -419,28 +420,27 @@
     // clear previous
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(h_canvas, 0, 0)
-
-
     ctx.strokeStyle = "black"
     ctx.lineWidth = 1
 
-    // get bodies
+    // get all current world bodies
     let bodies = Composite.allBodies(engine.world);
 
+    // draw non static platforms and objects
+    drawPlats(bodies, false);
 
-    // draw editing/shape in progress
+    // editor: draw shape in progress
     if (vertices[0]) {
-
       // draw shape edges
-      ctx.beginPath(); 
-      ctx.moveTo(vertices[0].x, vertices[0].y); 
+      ctx.beginPath();
+      ctx.moveTo(vertices[0].x, vertices[0].y);
       ctx.lineWidth = 5;
       ctx.setLineDash([5, 5]);
       vertices.forEach(vertex => {
         ctx.lineTo(vertex.x, vertex.y);
       })
-      ctx.lineTo(vertices[0].x, vertices[0].y); 
-      ctx.stroke(); 
+      ctx.lineTo(vertices[0].x, vertices[0].y);
+      ctx.stroke();
 
       // draw shape vertices
       ctx.setLineDash([]);
@@ -449,32 +449,9 @@
         ctx.arc(vertex.x, vertex.y, 10, 0, 2 * Math.PI);
         ctx.stroke();
       })
-
     }
 
-
-    // draw finished custom shapes
-    drawPlats(bodies, false);
-
-    //draw flag
-    if (flagPos) {
-      rc.line(flagPos[0], flagPos[1], flagPos[0], flagPos[1] - 200, { strokeWidth: 3 })
-
-      rc.polygon(
-        [
-          [flagPos[0], flagPos[1] - 200],
-          [flagPos[0] + 80, flagPos[1] - 170],
-          [flagPos[0], flagPos[1] - 140]
-        ], {
-        strokeWidth: 3,
-        fill: !sunk ? 'rgba(255,0,0,0.7)' : 'green',
-        fillStyle: "solid",
-      }
-      )
-      // }
-    }
-
-    // draw ball starting pos
+    // editor: draw ball starting pos
     if (Cx !== undefined && Cy !== undefined && !playing) {
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
       ctx.strokeStyle = 'rgba(0,0,0,0.5)'
@@ -486,133 +463,25 @@
       ctx.stroke();
     }
 
+    //draw flag
+    if (flagPos) {
+      rc.line(flagPos[0], flagPos[1], flagPos[0], flagPos[1] - 200, { strokeWidth: 3 })
+
+      rc.polygon(
+        [
+          [flagPos[0], flagPos[1] - 200],
+          [flagPos[0] + 80, flagPos[1] - 170],
+          [flagPos[0], flagPos[1] - 140]
+        ], {
+          strokeWidth: 3,
+          fill: !sunk ? 'rgba(255,0,0,0.7)' : 'green',
+          fillStyle: "solid",
+      })
+    }
 
 
-    // for (let i = 0; i < bodies.length; i += 1) {
-    //   let nextBody = bodies[i];
-    //   ctx.beginPath();
-    //   let vertices = bodies[i].vertices;
-
-
-
-
-    //   if (nextBody.render.track === true) {
-    //     let center = Vertices.centre(vertices);
-    //     if (points.length < 1) {
-    //       points.push(center);
-    //     }
-    //     let dist = Math.sqrt((center.x - points[points.length - 1].x) ** 2 + (center.y - points[points.length - 1].y) ** 2);
-
-    //     let unitV = [center.x - points[points.length - 1].x, center.y - points[points.length - 1].y].map(el => el / dist)
-
-    //     while (dist >= 15) {
-
-    //       let nextPoint = {}
-    //       nextPoint.x = unitV[0] * 15 + points[points.length - 1].x
-    //       nextPoint.y = unitV[1] * 15 + points[points.length - 1].y
-    //       points.push(nextPoint);
-    //       dist = Math.sqrt((center.x - points[points.length - 1].x) ** 2 + (center.y - points[points.length - 1].y) ** 2);
-
-    //       h_ctx.fillStyle = "black";
-    //       h_ctx.beginPath();
-    //       h_ctx.arc(nextPoint.x, nextPoint.y, 4, 2 * Math.PI, false);
-    //       h_ctx.fill()
-    //       // dist = Math.sqrt((center.x - points[points.length - 1].x) ** 2 + (center.y - points[points.length - 1].y) ** 2);
-
-    //     }
-    //   }
-
-
-
-
-    //   if (nextBody.render.type === "detector") {
-    //     //dont render
-    //     // let id = nextBody.render.id;
-
-    //     // if (gs[id] === undefined) {
-    //     //     let g = generator.polygon(vertices.map(el => [el.x, el.y]), {
-    //     //     stroke: "black", 
-    //     //     strokeWidth: 3,
-    //     //     fillWeight: 4,
-    //     //     // fill: nextBody.render.fill,
-    //     //     fill: "#13331b",
-    //     //     fillStyle: nextBody.render.fillStyle,
-    //     //     seed: between(1, 99999)
-    //     //   });
-
-    //     //   gs[id] = g;
-    //     // }
-
-    //     // rc.draw(gs[id]);
-
-    //   } else if (nextBody.render.type === "ground") {
-    //     let id = nextBody.render.id;
-
-    //     if (gs[id] === undefined) {
-    //       let g = generator.polygon(vertices.map(el => [el.x, el.y]), {
-    //         stroke: nextBody.render.stroke, strokeWidth: 3,
-    //         fill: nextBody.render.fill,
-    //         fillStyle: nextBody.render.fillStyle,
-    //         seed: between(1, 99999)
-    //       });
-
-    //       gs[id] = g;
-    //     }
-
-    //     rc.draw(gs[id]);
-
-    //   } else if (nextBody.render.type === "hole") {
-
-    //     let id = nextBody.render.id;
-
-    //     if (gs[id] === undefined) {
-    //       let g = generator.polygon(holeVertices.map(el => [el.x, el.y]), {
-    //         stroke: nextBody.render.stroke,
-    //         strokeWidth: 3,
-    //         fill: nextBody.render.fill,
-    //         fillStyle: nextBody.render.fillStyle,
-    //         seed: between(1, 99999)
-    //       });
-
-    //       gs[id] = g;
-    //     }
-
-    //     rc.draw(gs[id]);
-
-    //     // draw flag
-
-    //     let slope = (holeVertices[5].y - holeVertices[4].y) / (holeVertices[5].x - holeVertices[4].x)
-    //     let flagPos = [holeVertices[4].x + 5, holeVertices[4].y + 5 * slope];
-    //     rc.line(flagPos[0], flagPos[1], flagPos[0], flagPos[1] - 200, { strokeWidth: 3 })
-
-    //     rc.polygon(
-    //       [
-    //         [flagPos[0], flagPos[1] - 200],
-    //         [flagPos[0] + 80, flagPos[1] - 170],
-    //         [flagPos[0], flagPos[1] - 140]
-    //       ], {
-    //       strokeWidth: 3,
-    //       fill: !sunk ? 'rgba(255,0,0,0.7)' : 'green',
-    //       fillStyle: "solid",
-    //     }
-    //     )
-    //     // }
-    //   } else {
-
-
-
-
-    //     // ball
-
-
-    //   }
-
-    // }
-
-
-    // draw ball
-    if(ball !== undefined){
-
+    // draw ball position
+    if (ball !== undefined) {
       ctx.fillStyle = 'black';
       ctx.strokeStyle = 'black'
       ctx.lineWidth = 3;
@@ -627,82 +496,66 @@
       ctx.fill();
       ctx.stroke();
 
-      // draw path
-    let center = {x: ball.position.x, y: ball.position.y}
-    
-    if (points.length < 1) {
-      points.push(center);
-    }
+      // track ball's path and draw to background
+      let center = { x: ball.position.x, y: ball.position.y }
 
-    let dist = Math.sqrt((center.x - points[points.length - 1].x) ** 2 + (center.y - points[points.length - 1].y) ** 2);
-    // console.log(dist)
+      if (points.length < 1) {
+        points.push(center);
+      }
 
-    let unitV = [center.x - points[points.length - 1].x, center.y - points[points.length - 1].y].map(el => el / dist)
+      let dist = Math.sqrt((center.x - points[points.length - 1].x) ** 2 + (center.y - points[points.length - 1].y) ** 2);
+      let unitV = [center.x - points[points.length - 1].x, center.y - points[points.length - 1].y].map(el => el / dist)
 
-    while (dist >= 15) {
-      let nextPoint = {}
-      nextPoint.x = unitV[0] * 15 + points[points.length - 1].x
-      nextPoint.y = unitV[1] * 15 + points[points.length - 1].y
-      points.push(nextPoint);
-      dist = Math.sqrt((center.x - points[points.length - 1].x) ** 2 + (center.y - points[points.length - 1].y) ** 2);
+      while (dist >= 15) {
+        let nextPoint = {}
+        nextPoint.x = unitV[0] * 15 + points[points.length - 1].x
+        nextPoint.y = unitV[1] * 15 + points[points.length - 1].y
+        points.push(nextPoint);
+        dist = Math.sqrt((center.x - points[points.length - 1].x) ** 2 + (center.y - points[points.length - 1].y) ** 2);
 
-      h_ctx.fillStyle = "black";
-      h_ctx.beginPath();
-      h_ctx.arc(nextPoint.x, nextPoint.y, 4, 2 * Math.PI, false);
-      h_ctx.fill()
-      // dist = Math.sqrt((center.x - points[points.length - 1].x) ** 2 + (center.y - points[points.length - 1].y) ** 2);
-
-    }
-
-
+        h_ctx.fillStyle = "black";
+        h_ctx.beginPath();
+        h_ctx.arc(nextPoint.x, nextPoint.y, 4, 2 * Math.PI, false);
+        h_ctx.fill()
+      }
     }
 
     // if (ball.position.y > height - width / 30 || ball.position.x < 0 || ball.position.x > width) {
-
-
     //   reset();
     // }
 
+    // draw gameplay UI text
+    // if (playing) {
+    //   ctx.fillStyle = "black";
+    //   ctx.font = '52px Gloria Hallelujah'
+    //   ctx.fillText(
+    //     `Hole ${currentHole} / 9. Current strokes: ${strokes}`,
+    //     100, 100
+    //   )
+    //   let lives = ""
 
-    //text
-    if (playing) {
-      ctx.fillStyle = "black";
-      ctx.font = '52px Gloria Hallelujah'
-      ctx.fillText(
-        `Hole ${currentHole} / 9. Current strokes: ${strokes}`,
-        100, 100
-      )
-      let lives = ""
+    //   ctx.fillStyle = "red";
+    //   ctx.font = '82px Gloria Hallelujah'
+    //   ctx.fillText(`${"♡".repeat(attempts - 1)}${"♥".repeat(5 - attempts + 1)}`, width - 500, 120)
+    // } else {
+    //   // end screen stuff?
+    // }
 
-      ctx.fillStyle = "red";
-      ctx.font = '82px Gloria Hallelujah'
-      ctx.fillText(`${"♡".repeat(attempts - 1)}${"♥".repeat(5 - attempts + 1)}`, width - 500, 120)
-      // ctx.strokeStyle = "black";
-      // ctx.strokeText(`${"♡".repeat(attempts-1)}${"♥".repeat(5-attempts+1)}`,width - 500,120)
+    // // draw FPS display
+    // if (fps >= 50) {
+    //   ctx.fillStyle = "green";
+    // } else if (fps >= 40) {
+    //   ctx.fillStyle = "yellow"
+    // } else {
+    //   ctx.fillStyle = "red"
+    // }
+    // ctx.font = '52px Gloria Hallelujah'
+    // ctx.fillText(
+    //   `fps: ${Math.floor(fps)}`,
+    //   50, 100
+    // )
 
-    } else {
-      // end screen stuff?
-
-    }
-
-    // fps
-    if (fps >= 50) {
-      ctx.fillStyle = "green";
-    } else if (fps >= 40) {
-      ctx.fillStyle = "yellow"
-    } else {
-      ctx.fillStyle = "red"
-    }
-    ctx.font = '52px Gloria Hallelujah'
-
-
-    ctx.fillText(
-      `fps: ${Math.floor(fps)}`,
-      50, 100
-    )
-
-
-    // aim line arrow
+    // Draw gameplay shot aim line arrow
     if (playing && clickPos.x !== null && mousePos.x !== null) {
       let dist = Math.sqrt((clickPos.x - mousePos.x) ** 2 + (clickPos.y - mousePos.y) ** 2);
       let max = 400
@@ -729,18 +582,19 @@
       if (bombCount < 1) {
         ctx.strokeStyle = "grey"
       }
-
       rc.line(ball.position.x, ball.position.y, ball.position.x + x, ball.position.y - y, { stroke: ctx.strokeStyle, strokeWidth: 5, roughness: 1 })
       rc.line(ball.position.x + x + p2x, ball.position.y - y - p2y, ball.position.x + x, ball.position.y - y, { stroke: ctx.strokeStyle, strokeWidth: 5, roughness: 1 })
       rc.line(ball.position.x + x + p3x, ball.position.y - y - p3y, ball.position.x + x, ball.position.y - y, { stroke: ctx.strokeStyle, strokeWidth: 5, roughness: 1 })
     }
-
-
   }
+  // end main render function
+
+  
+
 
   // create a ball
-  function makeBall(){
-    if(Cx === undefined){
+  function makeBall() {
+    if (Cx === undefined) {
       return undefined;
     }
     let ball = Bodies.circle(Cx, Cy, 20, {
@@ -760,9 +614,15 @@
     return ball;
   }
 
-  function runTest(){
+
+
+
+
+
+  // editor: activate test mode
+  function runTest() {
     ball = makeBall();
-    if(!ball){
+    if (!ball) {
       alert("error: missing ball spawn");
       return;
     }
@@ -770,13 +630,13 @@
     clickPos = { x: null, y: null }
     mousePos = { x: null, y: null }
     document.getElementById('mode').value = 'test'
-    
+
     Composite.add(engine.world, [
       ball
     ]);
   }
-
-  function endTest(){
+  //editor: end test move
+  function endTest() {
     playing = false;
     sunk = false;
     Composite.remove(engine.world, [
@@ -786,26 +646,23 @@
     points = [];
     pastPoints = [];
 
-
+    // reset all world bodies
     [...engine.world.bodies].forEach(body => {
       recreateObject(body, true)
     });
 
-
-
     redrawBg();
-
-
-
   }
 
 
+
+  // begin gameplay loop stuff
   let currentTime = performance.now();
   let physicsBuffer = 0;
   let physicsStep = 16;
   let prevTime = new Date();
   let fps = 0;
-
+  // main gameplay loop
   function gameLoop() {
     if (currentHole < 10) {
       //get time in ms since last frame
@@ -817,7 +674,7 @@
       physicsBuffer += frameTime;
 
       while (physicsBuffer >= physicsStep) {
-        if(playing){
+        if (playing) {
           Engine.update(engine, physicsStep);
         }
         physicsBuffer -= physicsStep;
@@ -830,20 +687,23 @@
   }
   window.requestAnimationFrame(gameLoop);
 
-  // handle ball collision etc.
+  // gameplay: handle ball actions
   Events.on(engine, "collisionActive", (e) => {
     let pairs = e.pairs;
 
     for (let i = 0; i < pairs.length; i++) {
-      if (bombCount < 2 && ball.velocity.x ** 2 < 0.001 && ball.velocity.y ** 2 < 0.0001 && (pairs[i].bodyA.render?.type === 'ball' || pairs[i].bodyB.render?.type === 'ball')) {
+      // if ball not moving much, sleep ball and reset available strokes
+      if (ball.velocity.x ** 2 < 0.001 && ball.velocity.y ** 2 < 0.0001 && (pairs[i].bodyA.render?.type === 'ball' || pairs[i].bodyB.render?.type === 'ball')) {
         bombCount = 2;
         Matter.Sleeping.set(ball, true)
       }
 
+      // if ball colliding with hole detector
       if ((pairs[i].bodyA.render?.type === 'detector' || pairs[i].bodyB.render?.type === 'detector') && (pairs[i].bodyA.render?.type === 'ball' || pairs[i].bodyB.render?.type === 'ball')) {
         if (ball.velocity.x ** 2 < 0.001 && ball.velocity.y ** 2 < 0.001 && playing) {
           let detector = [pairs[i].bodyA, pairs[i].bodyB].filter(el => el.render?.type === 'detector')[0];
 
+          // if ball is in detector and not moving, hole is finished
           if (detector.bounds.min.y <= ball.position.y) {
             sunk = true;
           }
@@ -855,16 +715,9 @@
 
 
 
-  function getMousePos(canvas, evt) {
-    let rect = canvas.getBoundingClientRect();
-
-    return {
-      x: ((evt.clientX || evt.targetTouches[0].pageX) - rect.left) / (rect.right - rect.left) * canvas.width,
-      y: ((evt.clientY || evt.targetTouches[0].pageY) - rect.top) / (rect.bottom - rect.top) * canvas.height
-    };
-  }
 
 
+  // level editor functions:
   let vertices = [];
   let selection = document.getElementById('mode')
   let flagPos = null;
@@ -874,22 +727,12 @@
     if (selection.value === 'edge') {
       e.preventDefault();
       clickPos = getMousePos(canvas, e);
-      // console.log("mouseDown", clickPos)
       vertices.push(clickPos)
       canvas.style.cursor = "pointer";
     }
   });
 
-  canvas.addEventListener("mousedown", (e) => {
-    if (selection.value === 'flag') {
-      e.preventDefault();
-      clickPos = getMousePos(canvas, e);
-      flagPos = [clickPos.x, clickPos.y];
-    }
-  });
-
-
-  // drawing mode
+  // freehand drawing mode, ball adding mode, flag creation mode, level testing mode
   let drawing = false;
   canvas.addEventListener("mousedown", (e) => {
     if (selection.value === 'draw') {
@@ -904,77 +747,88 @@
       clickPos = getMousePos(canvas, e);
       Cx = clickPos.x;
       Cy = clickPos.y;
-    } else if (selection.value === 'test'){
+    } else if (selection.value === 'test') {
       e.preventDefault();
       clickPos = getMousePos(canvas, e);
       canvas.style.cursor = "pointer";
+    } else if (selection.value === 'flag') {
+      e.preventDefault();
+      clickPos = getMousePos(canvas, e);
+      flagPos = [clickPos.x, clickPos.y];
     }
   })
 
+  // track freehand drawing movement
   canvas.addEventListener("mousemove", (e) => {
     if (selection.value === 'draw' && drawing === true) {
-
       vertices.push(getMousePos(canvas, e));
-    } else if(selection.value === 'test'){
+    }
+  })
+
+  // track level testing shot aiming movement
+  document.addEventListener("mousemove", (e) => {
+    if (selection.value === 'test') {
       if (clickPos.x !== null) {
         mousePos = getMousePos(canvas, e);
       }
     }
-  }
-  )
+  })
 
+  // track freehand drawing end or level testing shot fire
   document.addEventListener("mouseup", (e) => {
     if (selection.value === 'draw') {
       drawing = false;
-    } else if(selection.value === 'test'){
+    } else if (selection.value === 'test') {
       mouseUp(e);
     }
   })
 
-
+  // execute gameplay shot
   function mouseUp(e) {
-      canvas.style.cursor = "default"
-      if (mousePos.x === null) {
-        return;
-      }
-
-      // let mousePos = getMousePos(canvas, e);
-      let ballPos = ball.position;
-      let dist = Math.sqrt((clickPos.x - mousePos.x) ** 2 + (clickPos.y - mousePos.y) ** 2);
-      let max = 400
-
-      if (dist > max) {
-        dist = max;
-      }
-
-      if (dist < 25) {
-        dist = 25;
-      }
-
-      dist = (dist) / max
-
-      let angle = -Math.atan2(clickPos.y - mousePos.y, clickPos.x - mousePos.x)
-
-
-      let x = Math.cos(angle);
-      let y = Math.sin(angle);
-
-      x = x * 16 * 0.01 * dist
-      y = y * 16 * 0.01 * dist
-
-      if (bombCount > 0 && playing) {
-        Matter.Sleeping.set(ball, false)
-
-        Body.applyForce(ball, ball.position, { x: x, y: -y })
-        strokes += 1;
-        bombCount -= 1;
-      }
-
-      clickPos = { x: null, y: null }
-      mousePos = { x: null, y: null }
+    canvas.style.cursor = "default"
+    if (mousePos.x === null) {
+      return;
     }
 
+    let ballPos = ball.position;
+    let dist = Math.sqrt((clickPos.x - mousePos.x) ** 2 + (clickPos.y - mousePos.y) ** 2);
+    let max = 400
 
+    if (dist > max) {
+      dist = max;
+    }
+
+    if (dist < 25) {
+      dist = 25;
+    }
+
+    dist = (dist) / max
+
+    let angle = -Math.atan2(clickPos.y - mousePos.y, clickPos.x - mousePos.x)
+    let x = Math.cos(angle);
+    let y = Math.sin(angle);
+
+    x = x * 16 * 0.01 * dist
+    y = y * 16 * 0.01 * dist
+
+    if (bombCount > 0 && playing) {
+      Matter.Sleeping.set(ball, false)
+      Body.applyForce(ball, ball.position, { x: x, y: -y })
+      strokes += 1;
+      bombCount -= 1;
+    }
+
+    clickPos = { x: null, y: null }
+    mousePos = { x: null, y: null }
+  }
+
+  // editor: remove previously added object
+  function removeLastObject() {
+    Composite.remove(engine.world, engine.world.bodies[engine.world.bodies.length - 1])
+    redrawBg();
+  }
+
+  // editor: write pending object to matter world
   function writeObject(e) {
     if (vertices.length > 0) {
       let center = Matter.Vertices.centre(vertices)
@@ -1002,7 +856,7 @@
       if (!newPlat) { alert('error'); vertices = []; return; }
 
       newPlat.restitution = 0.4,
-      newPlat.friction = 0.01;
+        newPlat.friction = 0.01;
 
       let minX = Math.min(...vertices.map(el => el.x));
       let minY = Math.min(...vertices.map(el => el.y));
@@ -1024,7 +878,7 @@
     }
   }
 
-  // create hole detector
+  // editor: write hole detector
   function writeDetector(e) {
     if (vertices.length > 0) {
       let prevDetector = engine.world.bodies.filter(el => el.render?.type === "detector");
@@ -1054,7 +908,7 @@
       if (!newPlat) { alert('error'); vertices = []; return; }
 
       newPlat.restitution = 0.4,
-      newPlat.friction = 0.01;
+        newPlat.friction = 0.01;
 
       let minX = Math.min(...vertices.map(el => el.x));
       let minY = Math.min(...vertices.map(el => el.y));
@@ -1065,7 +919,7 @@
       newPlat.render.center.x = newPlat.position.x
       newPlat.render.center.y = newPlat.position.y
 
-      if(prevDetector[0]){
+      if (prevDetector[0]) {
         console.log(prevDetector);
         alert('old detector removed');
         Composite.remove(engine.world, prevDetector);
@@ -1081,8 +935,9 @@
     }
   }
 
-  function levelToJSON(){
-    if(playing === true){
+  // serializer: save level to JSON object
+  function levelToJSON() {
+    if (playing === true) {
       alert("please end playtest");
       return;
     }
@@ -1094,9 +949,8 @@
     // add flag position
     serialObj.flagPos = flagPos;
 
-    serialObj.bodies = [];
-
     //add matter js objects;
+    serialObj.bodies = [];
     engine.world.bodies.forEach(body => {
       console.log(body.render);
       let nextBody = {};
@@ -1104,16 +958,21 @@
       nextBody.isStatic = body.isStatic;
       nextBody.isSensor = body.isSensor;
       serialObj.bodies.push(nextBody);
-  
+
       console.log(nextBody.render)
-  
+
     })
+    document.getElementById('levelData').value = JSON.stringify(serialObj);
     return JSON.stringify(serialObj);
   }
 
-  function recreateLevel(json){
+  // serializer: read level from json object
+  function recreateLevel(json) {
+    if (!json) {
+      json = document.getElementById('levelData').value
+    }
     // reset play attributes
-    
+
     gs = [];
 
     // clear previous world
@@ -1128,16 +987,15 @@
     data.bodies.forEach(body => {
       recreateObject(body)
     });
-
-
   }
 
-  function recreateObject(object, preExists){
+  // serializer: recreate an object back to its original position and attributes
+  function recreateObject(object, preExists) {
 
     let vertices = object.render.points;
     console.log("oldobject", object)
 
-     if (vertices.length > 0) {
+    if (vertices.length > 0) {
       let center = Matter.Vertices.centre(vertices)
       let color = object.render.fill;
       let fillStyle = object.render.fillStyle;
@@ -1176,7 +1034,7 @@
       newPlat.render.center.x = newPlat.position.x
       newPlat.render.center.y = newPlat.position.y
 
-      if(preExists === true){
+      if (preExists === true) {
         Composite.remove(engine.world, object, true);
       }
 
@@ -1194,16 +1052,13 @@
 
 
 
+  // editor: add chaikin curving
   function chaikinize() {
     if (!vertices) { return };
-
     vertices = vertices.map(el => [el.x, el.y]);
-
     vertices = chaikin(vertices, 1);
     vertices = vertices.map(el => { return ({ x: el[0], y: el[1] }) });
-
   }
-
   function chaikin(arr, num) {
     if (num === 0) return arr;
     const l = arr.length;
